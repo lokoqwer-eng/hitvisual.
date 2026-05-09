@@ -8,146 +8,136 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&display=swap');
-        body { 
-            background: #000; 
-            color: #fff; 
-            font-family: -apple-system, system-ui, sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            overflow: hidden; 
-        }
-        .unbounded { font-family: 'Unbounded', sans-serif; }
         
-        .canvas-card { 
-            flex: 1; 
-            margin: 20px; 
-            background: linear-gradient(145deg, #0f0f0f, #050505);
-            border: 1px solid rgba(255,255,255,0.05); 
-            border-radius: 40px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         }
 
-        #res-img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        
-        .ui-dock { 
-            background: #0a0a0a; 
-            padding: 30px 25px calc(35px + env(safe-area-inset-bottom)); 
-            border-radius: 45px 45px 0 0; 
-            border-top: 1px solid rgba(255,255,255,0.05); 
+        .unbounded { font-family: 'Unbounded', sans-serif; }
+
+        .header {
+            padding: 30px 0 15px;
+            text-align: center;
         }
 
-        .input-pill { 
-            background: rgba(255,255,255,0.03); 
+        .canvas-container {
+            flex: 1;
+            margin: 0 25px;
+            background: linear-gradient(145deg, #0f0f0f, #050505);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        #result-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .ui-panel {
+            background: #0a0a0a;
+            padding: 30px 25px calc(30px + env(safe-area-inset-bottom));
+            border-radius: 45px 45px 0 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .input-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 24px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 25px; 
-            padding: 20px 25px; 
-            margin-bottom: 20px; 
         }
 
-        .input-pill input { 
-            background: transparent; 
-            border: none; 
-            outline: none; 
-            color: #fff; 
-            width: 100%; 
-            font-size: 16px; 
+        .input-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            width: 100%;
+            font-size: 16px;
         }
 
-        .btn-lux { 
-            width: 100%; 
-            background: #ffffff; 
-            color: #000; 
-            padding: 22px; 
-            border-radius: 25px; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            font-family: 'Unbounded'; 
-            font-size: 14px;
+        .btn-generate {
+            background: #ffffff;
+            color: #000;
+            width: 100%;
+            padding: 22px;
+            border-radius: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: 'Unbounded';
             letter-spacing: 1px;
+            font-size: 14px;
+            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
         }
 
-        .btn-lux:disabled { opacity: 0.5; }
-
-        .loader-ring { 
-            width: 45px; 
-            height: 45px; 
-            border: 3px solid rgba(255,255,255,0.05); 
-            border-top-color: #00f2ff; 
-            border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
-            display: none; 
+        .loader {
+            width: 45px;
+            height: 45px;
+            border: 4px solid rgba(255,255,255,0.05);
+            border-top-color: #00f2ff;
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            display: none;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .hint { font-family: 'Unbounded'; font-size: 10px; letter-spacing: 4px; opacity: 0.15; text-transform: uppercase; text-align: center; }
+        .status-text {
+            font-family: 'Unbounded';
+            font-size: 11px;
+            letter-spacing: 4px;
+            opacity: 0.15;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
-    <div class="pt-10 pb-4 text-center">
-        <div class="unbounded text-[10px] tracking-[0.5em] opacity-30">HIT VISUAL LUX V10</div>
+    <div class="header">
+        <div class="unbounded text-[10px] tracking-[0.6em] opacity-30">HIT VISUAL LUX • V10</div>
     </div>
 
-    <div class="canvas-card">
-        <div class="loader-ring" id="loader"></div>
-        <div id="status" class="hint">ОЖИДАНИЕ МАСТЕРА</div>
-        <img id="res-img" src="" alt="ART">
+    <div class="canvas-container">
+        <div class="loader" id="loader"></div>
+        <div id="status" class="status-text">Ready to Create</div>
+        <img id="result-image" src="" alt="Результат">
     </div>
 
-    <div class="ui-dock">
-        <div class="input-pill">
-            <input type="text" id="prompt" placeholder="Опишите ваш замысел..." autocomplete="off">
+    <div class="ui-panel">
+        <div class="input-box">
+            <input type="text" id="prompt-input" placeholder="Опишите ваш замысел...">
         </div>
-        <button id="gen-btn" onclick="generateArt()" class="btn-lux">Генерировать</button>
+        <button id="main-button" onclick="handleGeneration()" class="btn-generate">Сгенерировать</button>
     </div>
 
     <script>
-        // Вставленный вами ключ
-        const apiKey = "AIzaSyBqsTIIFULj-i4WDUv8JoLmr9z8HhaDY9I"; 
+        const apiKey = ""; // Ключ для работы на внешних сайтах
 
-        async function generateWithRetry(prompt, retries = 5, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: `Generate a high quality image based on this prompt: ${prompt}` }] }],
-                            // Примечание: Для Imagen 4.0 используется предсказание, но мы адаптируем под flash для стабильности в Canvas среде если нужно.
-                            // Для прямой генерации картинок используем модель imagen
-                        })
-                    });
-                    
-                    // Однако для генерации картинок в этой версии мы используем прямой эндпоинт imagen:
-                    const imgResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
-                        method: 'POST',
-                        body: JSON.stringify({ instances: { prompt: prompt }, parameters: { sampleCount: 1 } })
-                    });
-                    
-                    if (imgResponse.ok) return await imgResponse.json();
-                } catch (e) {
-                    if (i === retries - 1) throw e;
-                    await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
-                }
-            }
-        }
-
-        async function generateArt() {
-            const promptVal = document.getElementById('prompt').value;
-            if (!promptVal) return;
+        async function handleGeneration() {
+            const promptInput = document.getElementById('prompt-input');
+            const prompt = promptInput.value;
+            if (!prompt) return;
 
             const loader = document.getElementById('loader');
             const status = document.getElementById('status');
-            const img = document.getElementById('res-img');
-            const btn = document.getElementById('gen-btn');
+            const img = document.getElementById('result-image');
+            const btn = document.getElementById('main-button');
 
             loader.style.display = 'block';
             status.style.display = 'none';
@@ -156,20 +146,31 @@
             btn.disabled = true;
 
             try {
-                const data = await generateWithRetry(promptVal);
-                if (data && data.predictions && data.predictions[0]) {
+                // Используем Imagen 4.0
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: [{ prompt: prompt }],
+                        parameters: { sampleCount: 1 }
+                    })
+                });
+
+                if (!response.ok) throw new Error('Ошибка сети');
+
+                const data = await response.json();
+                
+                if (data.predictions && data.predictions[0]) {
                     img.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
                     img.style.display = 'block';
                     loader.style.display = 'none';
-                } else {
-                    throw new Error();
                 }
-            } catch (err) {
+            } catch (error) {
+                status.innerText = "Ошибка ИИ";
                 status.style.display = 'block';
-                status.innerText = "ОШИБКА ДОСТУПА";
                 loader.style.display = 'none';
             } finally {
-                btn.innerText = "Генерировать";
+                btn.innerText = "Сгенерировать";
                 btn.disabled = false;
             }
         }
@@ -178,3 +179,4 @@
 </html>
 
 ```
+
