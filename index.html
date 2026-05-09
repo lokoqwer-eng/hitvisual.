@@ -4,13 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     
-    <!-- Мета-теги для ВК и соцсетей -->
     <title>HIT VISUAL LUXURY</title>
-    <meta property="og:title" content="HIT VISUAL LUXURY">
-    <meta property="og:description" content="Нейросетевая генерация эксклюзивных артов в один клик.">
-    <meta property="og:type" content="website">
-
+    
     <!-- VK Bridge -->
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,7 +18,6 @@
         :root {
             --neon: #00e5ff;
             --pink: #ff007b;
-            --dark-glass: rgba(15, 23, 42, 0.9);
         }
 
         body {
@@ -39,7 +35,6 @@
 
         .syncopate { font-family: 'Syncopate', sans-serif; }
 
-        /* Анимированный радужный текст группы */
         .glow-text {
             font-size: 10px;
             letter-spacing: 0.7em;
@@ -56,21 +51,19 @@
             to { background-position: 200% center; }
         }
 
-        /* Область изображения */
-        .art-display {
+        .art-canvas {
             flex: 1;
             margin: 15px;
-            background: #0a0a0a;
+            background: #0f172a;
             border-radius: 32px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
             overflow: hidden;
             border: 2px solid #fff;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         #result-img {
@@ -79,190 +72,158 @@
             display: none;
         }
 
-        /* Полноэкранный режим */
-        .art-display.fullscreen {
-            position: fixed;
-            inset: 0;
-            margin: 0;
-            z-index: 9999;
-            border-radius: 0;
-            background: #000;
+        .art-canvas.fullscreen {
+            position: fixed; inset: 0; margin: 0; z-index: 9999; border-radius: 0; background: #000;
         }
-        .art-display.fullscreen #result-img { object-fit: contain; }
+        .art-canvas.fullscreen #result-img { object-fit: contain; }
 
-        /* Панель ввода */
-        .dock-ui {
-            background: rgba(255, 255, 255, 0.96);
+        .ui-dock {
+            background: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             padding: 20px 20px calc(30px + env(safe-area-inset-bottom));
             border-radius: 40px 40px 0 0;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.04);
-            border-top: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.05);
         }
 
-        .input-wrap {
+        .input-box {
             position: relative;
-            background: #f8fafc;
-            border-radius: 22px;
+            background: #f1f5f9;
+            border-radius: 20px;
             padding: 16px 55px 16px 25px;
-            margin-bottom: 18px;
+            margin-bottom: 15px;
             border: 1px solid #e2e8f0;
         }
 
-        .input-wrap input {
-            background: transparent;
-            border: none;
-            outline: none;
-            width: 100%;
-            font-size: 16px;
-            color: #0f172a;
+        .input-box input {
+            background: transparent; border: none; outline: none; width: 100%; font-size: 16px; color: #0f172a;
         }
 
         .btn {
-            width: 100%;
-            padding: 18px;
-            border-radius: 20px;
-            font-family: 'Syncopate', sans-serif;
-            font-weight: 700;
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.3s;
+            width: 100%; padding: 18px; border-radius: 20px; font-family: 'Syncopate', sans-serif;
+            font-weight: 700; font-size: 11px; letter-spacing: 2px; transition: 0.3s;
         }
 
-        .btn-main { background: #000; color: #fff; box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
-        .btn-side { background: #fff; color: #000; border: 1px solid #e2e8f0; margin-top: 12px; display: none; }
+        .btn-black { background: #000; color: #fff; }
+        .btn-white { background: #fff; color: #000; border: 1px solid #e2e8f0; margin-top: 10px; display: none; }
+        .btn:active { transform: scale(0.97); }
 
-        .btn:active { transform: scale(0.96); }
-
-        .loader-box { display: none; flex-direction: column; align-items: center; }
+        .loader-ui { display: none; flex-direction: column; align-items: center; }
         .spinner {
             width: 45px; height: 45px;
             border: 4px solid rgba(0, 229, 255, 0.1);
             border-top: 4px solid var(--neon);
             border-radius: 50%;
-            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="pt-12 pb-3 text-center">
-        <div class="syncopate glow-text uppercase">HIT VISUAL LUXURY</div>
+    <div class="pt-10 pb-2 text-center">
+        <div class="glow-text syncopate">HIT VISUAL LUXURY</div>
     </div>
 
-    <div class="art-display" id="main-canvas" onclick="toggleFS()">
-        <div class="loader-box" id="loader">
+    <div class="art-canvas" id="canvas" onclick="toggleFS()">
+        <div class="loader-ui" id="loader">
             <div class="spinner"></div>
-            <div class="mt-5 text-[8px] tracking-[4px] text-white/40 font-bold uppercase syncopate">Creating Art...</div>
+            <div class="mt-4 text-[8px] tracking-[4px] text-white/50 font-bold uppercase syncopate">Rendering Art...</div>
         </div>
-        <div id="idle-msg" class="syncopate opacity-20 text-[9px] tracking-[0.5em] text-white text-center px-12">
-            НАПИШИТЕ ВАШ ЗАПРОС НИЖЕ
+        <div id="idle-text" class="syncopate opacity-20 text-[9px] tracking-[0.5em] text-white text-center px-12">
+            НАПИШИТЕ ВАШ ЗАПРОС
         </div>
-        <img id="result-img" src="" alt="AI generated content">
+        <img id="result-img" src="" alt="AI Art">
     </div>
 
-    <div class="dock-ui">
-        <div class="input-wrap">
-            <input type="text" id="prompt-field" placeholder="Например: Неоновый лев, 8k, футуризм..." autocomplete="off">
-            <div class="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer opacity-40 text-xl" onclick="clearInp()">❌</div>
+    <div class="ui-dock">
+        <div class="input-box">
+            <input type="text" id="prompt-input" placeholder="Космический пейзаж, 8k..." autocomplete="off">
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-30 text-xl cursor-pointer" onclick="clearInp()">❌</div>
         </div>
-        <button id="gen-btn" onclick="runGen()" class="btn btn-main">ГЕНЕРИРОВАТЬ</button>
-        <button id="save-btn" onclick="handleSave()" class="btn btn-side">СОХРАНИТЬ АРТ</button>
+        <button id="gen-btn" onclick="runGenerate()" class="btn btn-black">СОЗДАТЬ</button>
+        <button id="save-btn" onclick="handleSave()" class="btn btn-white">СОХРАНИТЬ</button>
     </div>
 
     <script>
-        // Старт VK Bridge
         vkBridge.send("VKWebAppInit");
 
         const img = document.getElementById('result-img');
         const loader = document.getElementById('loader');
-        const idle = document.getElementById('idle-msg');
-        const canvas = document.getElementById('main-canvas');
+        const idle = document.getElementById('idle-text');
+        const canvas = document.getElementById('canvas');
         const genBtn = document.getElementById('gen-btn');
         const saveBtn = document.getElementById('save-btn');
-        const field = document.getElementById('prompt-field');
+        const field = document.getElementById('prompt-input');
 
         function clearInp() { field.value = ''; field.focus(); }
 
         function toggleFS() {
-            if (img.src && img.style.display !== 'none') {
-                canvas.classList.toggle('fullscreen');
-            }
+            if (img.src && img.style.display !== 'none') canvas.classList.toggle('fullscreen');
         }
 
-        async function runGen() {
+        async function runGenerate() {
             const prompt = field.value;
             if (!prompt) return;
 
+            // СБРОС СОСТОЯНИЯ
+            img.style.display = 'none';
+            img.src = '';
+            saveBtn.style.display = 'none';
             loader.style.display = 'flex';
             idle.style.display = 'none';
-            img.style.display = 'none';
-            saveBtn.style.display = 'none';
             genBtn.disabled = true;
-            genBtn.innerText = "ОЖИДАЙТЕ...";
+            genBtn.innerText = "ГЕНЕРАЦИЯ...";
 
-            const seed = Math.floor(Math.random() * 8888888);
-            // Используем Flux модель через Pollinations с усилением промпта
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux&enhance=true`;
+            const seed = Math.floor(Math.random() * 10000000);
+            const ts = Date.now();
+            // Добавляем timestamp (ts) в конец URL, чтобы убить кэш браузера
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux&enhance=true&t=${ts}`;
 
-            const t = new Image();
-            t.crossOrigin = "anonymous";
-            t.src = url;
-
-            t.onload = () => {
+            const tester = new Image();
+            tester.crossOrigin = "anonymous";
+            
+            tester.onload = () => {
+                // Принудительно обновляем src основного элемента
                 img.src = url;
                 img.style.display = 'block';
                 loader.style.display = 'none';
                 genBtn.disabled = false;
-                genBtn.innerText = "ГЕНЕРИРОВАТЬ";
+                genBtn.innerText = "СОЗДАТЬ";
                 saveBtn.style.display = 'block';
-                
                 vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
             };
 
-            t.onerror = () => {
+            tester.onerror = () => {
                 loader.style.display = 'none';
                 idle.style.display = 'block';
-                idle.innerText = "ОШИБКА. ПОВТОРИТЕ.";
+                idle.innerText = "СБОЙ СЕТИ. ПОВТОРИТЕ.";
                 genBtn.disabled = false;
-                genBtn.innerText = "ГЕНЕРИРОВАТЬ";
+                genBtn.innerText = "СОЗДАТЬ";
             };
+
+            tester.src = url;
         }
 
         function handleSave() {
             if (!img.src) return;
 
-            // Проверка поддержки прямого скачивания
-            vkBridge.supports("VKWebAppDownloadFile").then((available) => {
-                if (available) {
-                    vkBridge.send("VKWebAppDownloadFile", {
-                        url: img.src,
-                        filename: `hit_art_${Date.now()}.jpg`
-                    }).catch(() => {
-                        openViewer();
-                    });
-                } else {
-                    openViewer();
-                }
-            });
-        }
-
-        function openViewer() {
-            vkBridge.send("VKWebAppShowImages", { images: [img.src] });
-            // Сообщаем пользователю, как сохранить вручную
+            // Универсальный фоллбэк: открыть картинку во весь экран в ВК
+            // Это позволяет сохранить ее через долгое нажатие даже без спецправ приложения
+            vkBridge.send("VKWebAppShowImages", { images: [img.src] })
+                .catch(() => {
+                    // Если вдруг ShowImages упал, открываем в новой вкладке
+                    window.open(img.src, '_blank');
+                });
+            
             setTimeout(() => {
-                vkBridge.send("VKWebAppShowNativeAds", { ad_format: "interstitial" }).catch(()=>{}); // Опционально: показать рекламу перед сохранением
-                alert('Зажмите фото пальцем → "Сохранить"');
-            }, 800);
+                alert('💡 Зажмите фото пальцем → "Сохранить в галерею"');
+            }, 1000);
         }
 
-        field.addEventListener('keypress', (e) => { if (e.key === 'Enter') runGen(); });
+        field.addEventListener('keypress', (e) => { if (e.key === 'Enter') runGenerate(); });
     </script>
 </body>
 </html>
-
 
 
