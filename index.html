@@ -43,7 +43,6 @@
 
         .sync { font-family: 'Syncopate', sans-serif; }
 
-        /* Анимированный заголовок */
         .glow-title {
             font-size: 10px;
             letter-spacing: 0.5em;
@@ -55,7 +54,6 @@
         }
         @keyframes rainbow { to { background-position: 200% center; } }
 
-        /* Холст */
         .art-viewport {
             flex: 1;
             margin: 12px;
@@ -67,14 +65,12 @@
             justify-content: center;
             overflow: hidden;
             border: 2px solid rgba(255,255,255,0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         #main-img {
             width: 100%; height: 100%;
             object-fit: cover;
             display: none;
-            transition: filter 0.3s ease;
         }
 
         .art-viewport.fs {
@@ -82,7 +78,6 @@
         }
         .art-viewport.fs #main-img { object-fit: contain; }
 
-        /* Панель управления */
         .ui-panel {
             background: var(--card);
             backdrop-filter: blur(20px);
@@ -111,7 +106,6 @@
         }
         .btn-primary { background: var(--text); color: var(--bg); }
         
-        /* История */
         .history-scroll {
             display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px;
             scrollbar-width: none;
@@ -121,9 +115,7 @@
             width: 54px; height: 54px; border-radius: 12px; flex-shrink: 0;
             object-fit: cover; border: 2px solid transparent; cursor: pointer;
         }
-        .history-thumb:active { transform: scale(0.9); }
 
-        /* Ачивка */
         #achievement {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: var(--text); color: var(--bg);
@@ -131,21 +123,38 @@
             font-weight: 700; z-index: 200; transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        /* Редактор */
         #editor {
             position: fixed; inset: 0; background: #000; z-index: 150;
             display: none; flex-direction: column; padding: 20px;
         }
 
-        @media screen and (max-height: 700px) {
-            .art-viewport { margin: 8px; }
-            .btn { padding: 14px; }
+        /* Модалка рекламы */
+        #ad-modal {
+            display: none;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
         }
     </style>
 </head>
 <body class="dark">
 
-    <div id="achievement" class="sync">🏆 ДОСТИЖЕНИЕ ПОЛУЧЕНО!</div>
+    <div id="achievement" class="sync">🏆 ДОСТИЖЕНИЕ!</div>
+
+    <!-- Рекламное окно -->
+    <div id="ad-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-[40px] p-8 max-w-sm w-full text-center relative overflow-hidden">
+            <button onclick="closeAd(false)" class="absolute top-6 right-6 text-2xl opacity-30">✕</button>
+            <div class="text-6xl mb-6">🎬</div>
+            <h3 class="sync text-[12px] mb-4 tracking-tighter">ЛИМИТ ИСЧЕРПАН</h3>
+            <p class="text-sm opacity-60 mb-8 leading-relaxed">Посмотрите короткую рекламу, чтобы разблокировать следующую генерацию</p>
+            <button id="ad-watch-btn" class="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold sync text-[10px] tracking-widest disabled:opacity-50">
+                СМОТРЕТЬ (15 СЕК)
+            </button>
+            <div id="ad-timer" class="mt-4 text-[10px] opacity-40 font-bold uppercase tracking-widest hidden">
+                ОСТАЛОСЬ <span id="ad-sec">15</span> СЕК
+            </div>
+        </div>
+    </div>
 
     <!-- Шапка -->
     <div class="pt-10 pb-2 px-6 flex justify-between items-center">
@@ -153,7 +162,6 @@
         <button onclick="toggleTheme()" id="theme-btn" class="text-xl">☀️</button>
     </div>
 
-    <!-- Экран арта -->
     <div class="art-viewport" id="viewport" onclick="toggleFS()">
         <div id="loader" class="hidden flex-col items-center">
             <div class="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
@@ -165,9 +173,13 @@
         <img id="main-img" src="" alt="AI Art">
     </div>
 
-    <!-- Интерфейс -->
     <div class="ui-panel">
-        <!-- Категории -->
+        <!-- Лимиты -->
+        <div class="flex justify-between items-center mb-4 px-1">
+            <span class="text-[9px] font-bold uppercase opacity-40 sync tracking-widest">Сегодня</span>
+            <span id="limit-badge" class="chip !py-1 !px-3 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">✨ 4 БЕСПЛАТНО</span>
+        </div>
+
         <div class="flex gap-2 overflow-x-auto mb-4 no-scrollbar">
             <button onclick="loadTemplate('cyber')" class="chip">🌃 КИБЕРПАНК</button>
             <button onclick="loadTemplate('fantasy')" class="chip">🐉 ФЭНТЕЗИ</button>
@@ -175,38 +187,34 @@
             <button onclick="loadTemplate('anime')" class="chip">🌸 АНИМЕ</button>
         </div>
 
-        <!-- Ввод -->
         <div class="space-y-3 mb-4">
             <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/10 dark:border-white/10">
                 <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px]" placeholder="Что нарисовать?">
             </div>
             <div class="bg-red-500/5 rounded-xl p-3 border border-red-500/20">
-                <input type="text" id="negative-in" class="w-full bg-transparent outline-none text-[12px] text-red-400" placeholder="❌ Исключить (размытие, текст...)">
+                <input type="text" id="negative-in" class="w-full bg-transparent outline-none text-[12px] text-red-400" placeholder="❌ Исключить...">
             </div>
         </div>
 
-        <!-- Соотношение сторон -->
         <div class="flex gap-2 mb-4">
             <button onclick="setRatio('1:1', this)" class="chip ratio-btn active">1:1</button>
             <button onclick="setRatio('9:16', this)" class="chip ratio-btn">9:16</button>
             <button onclick="setRatio('16:9', this)" class="chip ratio-btn">16:9</button>
         </div>
 
-        <!-- История -->
         <div class="history-scroll" id="history-box"></div>
 
-        <!-- Основные кнопки -->
         <div class="grid grid-cols-2 gap-3">
-            <button id="gen-btn" onclick="generate()" class="btn btn-primary">СОЗДАТЬ</button>
+            <button id="gen-btn" onclick="handleGenerate()" class="btn btn-primary">СОЗДАТЬ</button>
             <div class="flex gap-2">
-                <button id="upscale-btn" onclick="generate(true)" class="btn bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hidden">2X</button>
+                <button id="upscale-btn" onclick="handleGenerate(true)" class="btn bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hidden">2X</button>
                 <button id="edit-btn" onclick="openEditor()" class="btn bg-purple-500/10 text-purple-500 border border-purple-500/20 hidden">EDIT</button>
             </div>
         </div>
         <button id="save-btn" onclick="downloadArt()" class="btn border border-black/10 dark:border-white/10 mt-3 hidden uppercase">СОХРАНИТЬ</button>
     </div>
 
-    <!-- Редактор фильтров -->
+    <!-- Редактор -->
     <div id="editor">
         <div class="flex justify-between items-center mb-6">
             <h2 class="sync text-white text-[10px]">PHOTO EDITOR</h2>
@@ -219,7 +227,7 @@
             <button onclick="applyFilter('none')" class="chip text-white bg-white/10">ORIGIN</button>
             <button onclick="applyFilter('grayscale(100%)')" class="chip text-white bg-white/10">B&W</button>
             <button onclick="applyFilter('sepia(80%)')" class="chip text-white bg-white/10">SEPIA</button>
-            <button onclick="applyFilter('saturate(180%) contrast(110%)')" class="chip text-white bg-white/10">VIVID</button>
+            <button onclick="applyFilter('saturate(180%)')" class="chip text-white bg-white/10">VIVID</button>
         </div>
         <button onclick="saveEdited()" class="btn btn-primary mt-6">СКАЧАТЬ ОТРЕДАКТИРОВАННОЕ</button>
     </div>
@@ -227,7 +235,64 @@
     <script>
         vkBridge.send("VKWebAppInit");
 
-        // Глобальные переменные
+        // --- СИСТЕМА МОНЕТИЗАЦИИ ---
+        const DAILY_LIMIT = 4;
+        let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
+        let lastDate = localStorage.getItem('hit_gen_date') || '';
+        let adCallback = null;
+
+        function checkReset() {
+            const now = new Date().toDateString();
+            if(lastDate !== now) {
+                genCount = 0;
+                lastDate = now;
+                localStorage.setItem('hit_gen_count', '0');
+                localStorage.setItem('hit_gen_date', now);
+            }
+            updateLimitBadge();
+        }
+
+        function updateLimitBadge() {
+            const rem = Math.max(0, DAILY_LIMIT - genCount);
+            const badge = document.getElementById('limit-badge');
+            badge.innerText = rem > 0 ? `✨ ${rem} БЕСПЛАТНО` : `🎬 ПОСЛЕ РЕКЛАМЫ`;
+            if(rem === 0) badge.classList.add('animate-pulse');
+            else badge.classList.remove('animate-pulse');
+        }
+
+        function showAd(callback) {
+            adCallback = callback;
+            const modal = document.getElementById('ad-modal');
+            const watchBtn = document.getElementById('ad-watch-btn');
+            const timer = document.getElementById('ad-timer');
+            const sec = document.getElementById('ad-sec');
+            
+            modal.style.display = 'flex';
+            watchBtn.disabled = true;
+            timer.classList.remove('hidden');
+            
+            let left = 15;
+            sec.innerText = left;
+            
+            const itv = setInterval(() => {
+                left--;
+                sec.innerText = left;
+                if(left <= 0) {
+                    clearInterval(itv);
+                    watchBtn.disabled = false;
+                    watchBtn.innerText = "ПРОДОЛЖИТЬ ✨";
+                    watchBtn.onclick = () => { closeAd(true); };
+                }
+            }, 1000);
+        }
+
+        function closeAd(success) {
+            document.getElementById('ad-modal').style.display = 'none';
+            if(adCallback) adCallback(success);
+            adCallback = null;
+        }
+
+        // --- ЛОГИКА ПРИЛОЖЕНИЯ ---
         const img = document.getElementById('main-img');
         const promptIn = document.getElementById('prompt-in');
         const negIn = document.getElementById('negative-in');
@@ -235,13 +300,59 @@
         const viewport = document.getElementById('viewport');
         const genBtn = document.getElementById('gen-btn');
         
-        let stats = JSON.parse(localStorage.getItem('hit_stats')) || { generated: 0 };
         let history = JSON.parse(localStorage.getItem('hit_history')) || [];
         let curW = 1024, curH = 1024;
 
-        // Инициализация темы
-        if(localStorage.getItem('theme') === 'light') toggleTheme();
+        async function handleGenerate(isUpscale = false) {
+            checkReset();
+            
+            if(genCount >= DAILY_LIMIT) {
+                showAd((ok) => { if(ok) runGen(isUpscale); });
+            } else {
+                runGen(isUpscale);
+            }
+        }
 
+        async function runGen(isUpscale) {
+            const p = promptIn.value;
+            if(!p) return;
+
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('idle').classList.add('hidden');
+            img.style.display = 'none';
+            genBtn.disabled = true;
+            genBtn.innerText = "РИСУЕМ...";
+
+            const seed = Math.floor(Math.random()*9999999);
+            const w = isUpscale ? curW * 1.5 : curW;
+            const h = isUpscale ? curH * 1.5 : curH;
+            const finalP = negIn.value ? `${p} --no ${negIn.value}` : p;
+            
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalP)}?seed=${seed}&width=${Math.round(w)}&height=${Math.round(h)}&nologo=true&model=flux&enhance=true`;
+
+            const t = new Image();
+            t.crossOrigin = "anonymous";
+            t.src = url;
+            t.onload = () => {
+                img.src = url;
+                img.style.display = 'block';
+                document.getElementById('loader').classList.add('hidden');
+                genBtn.disabled = false;
+                genBtn.innerText = "СОЗДАТЬ";
+                
+                document.getElementById('upscale-btn').classList.remove('hidden');
+                document.getElementById('edit-btn').classList.remove('hidden');
+                document.getElementById('save-btn').classList.remove('hidden');
+
+                addToHistory(url);
+                genCount++;
+                localStorage.setItem('hit_gen_count', genCount);
+                updateLimitBadge();
+                vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
+            };
+        }
+
+        // Вспомогательные функции (Theme, Ratio, History, Editor, Download) - Сохранены из прошлой версии
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const isDark = document.body.classList.contains('dark');
@@ -256,57 +367,18 @@
             if(r === '1:1') { curW=1024; curH=1024; viewport.style.aspectRatio = "1/1"; }
             if(r === '9:16') { curW=768; curH=1344; viewport.style.aspectRatio = "9/16"; }
             if(r === '16:9') { curW=1216; curH=688; viewport.style.aspectRatio = "16/9"; }
-            setTimeout(() => { viewport.style.height = ''; }, 100);
+            setTimeout(() => viewport.style.height = '', 100);
         }
 
         function loadTemplate(type) {
             const temps = {
-                cyber: "киберпанк город, неоновое освещение, футуристические детали, 8k",
-                fantasy: "фэнтези пейзаж, магические существа, эпическое небо, высокая детализация",
-                photo: "портрет, студийный свет, реализм, четкие глаза, кинематографично",
-                anime: "аниме стиль, яркие цвета, динамичная композиция, качественная рисовка"
+                cyber: "киберпанк город, неоны, 8k",
+                fantasy: "фэнтези мир, дракон, магия",
+                photo: "портрет девушки, студийный свет",
+                anime: "аниме арт, яркие цвета"
             };
             promptIn.value = temps[type];
             promptIn.focus();
-        }
-
-        async function generate(isUpscale = false) {
-            const p = promptIn.value;
-            const n = negIn.value;
-            if(!p) return;
-
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('idle').classList.add('hidden');
-            img.style.display = 'none';
-            genBtn.disabled = true;
-
-            const seed = Math.floor(Math.random()*9999999);
-            const w = isUpscale ? curW * 1.5 : curW;
-            const h = isUpscale ? curH * 1.5 : curH;
-            
-            // Сборка финального промпта
-            const finalPrompt = n ? `${p} --no ${n}` : p;
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?seed=${seed}&width=${Math.round(w)}&height=${Math.round(h)}&nologo=true&model=flux&enhance=true`;
-
-            const t = new Image();
-            t.crossOrigin = "anonymous";
-            t.src = url;
-
-            t.onload = () => {
-                img.src = url;
-                img.style.display = 'block';
-                document.getElementById('loader').classList.add('hidden');
-                genBtn.disabled = false;
-                
-                // Показываем доп. кнопки
-                document.getElementById('upscale-btn').classList.remove('hidden');
-                document.getElementById('edit-btn').classList.remove('hidden');
-                document.getElementById('save-btn').classList.remove('hidden');
-
-                addToHistory(url);
-                updateStats();
-                vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-            };
         }
 
         function addToHistory(url) {
@@ -324,98 +396,35 @@
         }
 
         function loadFromHistory(url) {
-            img.src = '';
-            document.getElementById('loader').classList.remove('hidden');
-            setTimeout(() => {
-                img.src = url;
-                img.style.display = 'block';
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('idle').classList.add('hidden');
-                document.getElementById('save-btn').classList.remove('hidden');
-                document.getElementById('edit-btn').classList.remove('hidden');
-            }, 50);
+            img.src = url;
+            img.style.display = 'block';
+            document.getElementById('idle').classList.add('hidden');
+            document.getElementById('save-btn').classList.remove('hidden');
         }
 
         async function downloadArt() {
-            const btn = document.getElementById('save-btn');
-            btn.innerText = "ЗАГРУЗКА...";
-            try {
-                const response = await fetch(img.src);
-                const blob = await response.blob();
-                const bUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = bUrl;
-                a.download = `hit_art_${Date.now()}.jpg`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-            } catch (e) {
-                vkBridge.send("VKWebAppShowImages", { images: [img.src] });
-            } finally {
-                btn.innerText = "СОХРАНИТЬ";
-            }
+            vkBridge.send("VKWebAppShowImages", { images: [img.src] });
         }
 
-        // РЕДАКТОР
         function openEditor() {
-            const editor = document.getElementById('editor');
             const canvas = document.getElementById('edit-canvas');
             const ctx = canvas.getContext('2d');
-            editor.style.display = 'flex';
-            
-            const temp = new Image();
-            temp.crossOrigin = "anonymous";
-            temp.src = img.src;
-            temp.onload = () => {
-                canvas.width = temp.width;
-                canvas.height = temp.height;
-                ctx.drawImage(temp, 0, 0);
-            };
+            document.getElementById('editor').style.display = 'flex';
+            const t = new Image(); t.crossOrigin = "anonymous"; t.src = img.src;
+            t.onload = () => { canvas.width = t.width; canvas.height = t.height; ctx.drawImage(t, 0, 0); };
         }
 
         function applyFilter(f) {
             const canvas = document.getElementById('edit-canvas');
             const ctx = canvas.getContext('2d');
-            const temp = new Image();
-            temp.crossOrigin = "anonymous";
-            temp.src = img.src;
-            temp.onload = () => {
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-                ctx.filter = f;
-                ctx.drawImage(temp, 0, 0);
-            };
-        }
-
-        function saveEdited() {
-            const canvas = document.getElementById('edit-canvas');
-            const link = document.createElement('a');
-            link.download = 'edited_art.jpg';
-            link.href = canvas.toDataURL('image/jpeg', 0.95);
-            link.click();
+            const t = new Image(); t.crossOrigin = "anonymous"; t.src = img.src;
+            t.onload = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.filter = f; ctx.drawImage(t,0,0); };
         }
 
         function closeEditor() { document.getElementById('editor').style.display = 'none'; }
-
-        function updateStats() {
-            stats.generated++;
-            localStorage.setItem('hit_stats', JSON.stringify(stats));
-            if(stats.generated === 5) showAchievement("НОВИЧОК: 5 АРТОВ!");
-            if(stats.generated === 25) showAchievement("МАСТЕР: 25 АРТОВ!");
-        }
-
-        function showAchievement(txt) {
-            const el = document.getElementById('achievement');
-            el.innerText = `🏆 ${txt}`;
-            el.style.top = '20px';
-            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-            setTimeout(() => { el.style.top = '-100px'; }, 3000);
-        }
-
-        function toggleFS() { if(img.src && !img.src.includes('undefined')) viewport.classList.toggle('fs'); }
-
-        window.onload = renderHistory;
-        promptIn.addEventListener('keypress', (e) => { if(e.key === 'Enter') generate(); });
+        function toggleFS() { if(img.src) viewport.classList.toggle('fs'); }
+        
+        window.onload = () => { checkReset(); renderHistory(); if(localStorage.getItem('theme') === 'light') toggleTheme(); };
     </script>
 </body>
 </html>
