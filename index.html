@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>HIT VISUAL LUXURY</title>
+    <!-- Подключаем VK Bridge для работы внутри ВК -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Montserrat:wght@300;600;900&display=swap');
@@ -12,11 +14,11 @@
         :root {
             --neon-blue: #00e5ff;
             --neon-pink: #ff007b;
-            --glass: rgba(255, 255, 255, 0.9);
+            --vk-bg: #ebedf0; /* Цвет фона ВК для бесшовности */
         }
 
         body {
-            background-color: #f8fafc;
+            background-color: var(--vk-bg);
             background-image: 
                 radial-gradient(at 0% 0%, rgba(0, 229, 255, 0.08) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(255, 0, 123, 0.05) 0px, transparent 50%);
@@ -31,16 +33,16 @@
 
         .syncopate { font-family: 'Syncopate', sans-serif; }
 
-        /* Радужная анимация текста группы */
+        /* Радужный текст с поддержкой Safari/VK */
         .glow-text {
             font-size: 10px;
             letter-spacing: 0.8em;
             font-weight: 700;
             background: linear-gradient(90deg, #00e5ff, #ff007b, #7000ff, #00e5ff);
             background-size: 300% auto;
-            color: transparent;
+            color: #000;
             -webkit-background-clip: text;
-            background-clip: text;
+            -webkit-text-fill-color: transparent;
             animation: rainbow 4s linear infinite;
         }
 
@@ -48,277 +50,187 @@
             to { background-position: 300% center; }
         }
 
-        /* Область для вывода изображения */
         .canvas-area {
             flex: 1;
             margin: 15px;
-            background: #0f172a; /* Глубокий темный фон для контраста фото */
-            border-radius: 32px;
+            background: #0f172a;
+            border-radius: 28px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.25);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.8);
+            border: 1px solid #fff;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         #output-img {
             width: 100%; height: 100%;
             object-fit: cover;
             display: none;
-            transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: transform 0.5s ease;
         }
 
-        /* Полноэкранный режим */
         .canvas-area.fullscreen {
             position: fixed;
             inset: 0;
             margin: 0;
-            z-index: 1000;
+            z-index: 9999;
             border-radius: 0;
             background: #000;
         }
+        .canvas-area.fullscreen #output-img { object-fit: contain; }
 
-        .canvas-area.fullscreen #output-img {
-            object-fit: contain;
-            transform: scale(1);
-        }
-
-        /* Панель управления */
         .ui-dock {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            padding: 25px 20px calc(30px + env(safe-area-inset-bottom));
-            border-radius: 45px 45px 0 0;
-            border-top: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 -15px 40px rgba(0,0,0,0.04);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 20px calc(25px + env(safe-area-inset-bottom));
+            border-radius: 35px 35px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
             z-index: 100;
         }
 
-        .input-container {
+        .input-box {
             position: relative;
             background: #fff;
-            border-radius: 24px;
-            padding: 20px 55px 20px 28px;
-            margin-bottom: 22px;
+            border-radius: 20px;
+            padding: 15px 50px 15px 20px;
+            margin-bottom: 15px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        .input-container input {
+        .input-box input {
             background: transparent;
             border: none;
             outline: none;
-            color: #1e293b;
             width: 100%;
             font-size: 16px;
-            font-weight: 400;
         }
 
-        .clear-btn {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 4px;
-            transition: color 0.2s;
-        }
-
-        .clear-btn:hover { color: var(--neon-pink); }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .btn {
-            padding: 20px;
-            border-radius: 22px;
-            font-family: 'Syncopate', sans-serif;
-            font-weight: 700;
-            font-size: 10px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .btn-gen {
-            background: #0f172a;
+        .btn-main {
+            background: #000;
             color: #fff;
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
-        }
-
-        .btn-down {
-            background: #fff;
-            color: #0f172a;
-            border: 1px solid #e2e8f0;
-            display: none;
-        }
-
-        .btn:active { transform: scale(0.96); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .loader {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .spinner {
-            width: 45px; height: 45px;
-            border: 4px solid rgba(0, 229, 255, 0.1);
-            border-top: 4px solid var(--neon-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .status-msg {
-            margin-top: 18px;
+            width: 100%;
+            padding: 18px;
+            border-radius: 20px;
             font-family: 'Syncopate', sans-serif;
-            font-size: 8px;
-            letter-spacing: 4px;
-            color: #94a3b8;
+            font-size: 11px;
+            letter-spacing: 3px;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: 0.3s;
         }
+
+        .btn-main:active { transform: scale(0.97); }
+
+        .btn-secondary {
+            background: #fff;
+            color: #000;
+            border: 1px solid #e2e8f0;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .loader { display: none; flex-direction: column; align-items: center; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(0, 229, 255, 0.1);
+            border-top: 3px solid var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="pt-12 pb-3 text-center">
+    <div class="pt-8 pb-2 text-center">
         <div class="syncopate glow-text">HIT VISUAL LUXURY</div>
     </div>
 
-    <div class="canvas-area" id="canvas" onclick="toggleFullscreen()">
+    <div class="canvas-area" id="canvas" onclick="toggleFs()">
         <div class="loader" id="loader">
             <div class="spinner"></div>
-            <div class="status-msg">RENDER IN PROGRESS</div>
+            <div class="status-msg text-[8px] syncopate mt-4 opacity-50">GENERATING...</div>
         </div>
-        <div id="idle-text" class="syncopate opacity-20 text-[9px] tracking-[0.6em] px-10 text-center text-white">
-            READY TO DESIGN
-        </div>
-        <img id="output-img" src="" alt="AI GENERATED IMAGE">
+        <div id="idle" class="syncopate opacity-20 text-[9px] tracking-widest text-white">READY FOR INPUT</div>
+        <img id="output-img" src="" alt="Art">
     </div>
 
-    <div class="ui-dock" id="ui-dock">
-        <div class="input-container">
-            <input type="text" id="prompt-input" placeholder="ОПИШИТЕ ВАШ ЗАМЫСЕЛ..." autocomplete="off">
-            <div class="clear-btn" onclick="clearInput(event)">❌</div>
+    <div class="ui-dock">
+        <div class="input-box">
+            <input type="text" id="p-in" placeholder="ОПИШИТЕ ВАШ ЗАМЫСЕЛ..." autocomplete="off">
+            <div style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer" onclick="document.getElementById('p-in').value=''">❌</div>
         </div>
-        
-        <div class="btn-group">
-            <button id="gen-btn" onclick="generate()" class="btn btn-gen">СОЗДАТЬ</button>
-            <button id="down-btn" onclick="downloadImg(event)" class="btn btn-down">СКАЧАТЬ</button>
-        </div>
+        <button id="b-gen" onclick="generate()" class="btn-main">СОЗДАТЬ</button>
+        <button id="b-down" onclick="download()" class="btn-main btn-secondary">СКАЧАТЬ</button>
     </div>
 
     <script>
-        const promptInput = document.getElementById('prompt-input');
+        // Инициализация ВК Бридж сразу
+        vkBridge.send("VKWebAppInit");
+
+        const pin = document.getElementById('p-in');
         const loader = document.getElementById('loader');
-        const idleText = document.getElementById('idle-text');
+        const idle = document.getElementById('idle');
         const img = document.getElementById('output-img');
-        const btnGen = document.getElementById('gen-btn');
-        const btnDown = document.getElementById('down-btn');
+        const bgen = document.getElementById('b-gen');
+        const bdown = document.getElementById('b-down');
         const canvas = document.getElementById('canvas');
 
-        function clearInput(e) {
-            if(e) e.stopPropagation();
-            promptInput.value = "";
-            promptInput.focus();
-        }
-
-        function toggleFullscreen() {
-            if (!img.src || img.style.display === 'none') return;
-            canvas.classList.toggle('fullscreen');
+        function toggleFs() {
+            if (img.src) canvas.classList.toggle('fullscreen');
         }
 
         async function generate() {
-            const prompt = promptInput.value;
+            const prompt = pin.value;
             if (!prompt) return;
 
-            // Сбрасываем UI
             loader.style.display = 'flex';
-            idleText.style.display = 'none';
+            idle.style.display = 'none';
             img.style.display = 'none';
-            btnDown.style.display = 'none';
-            btnGen.innerText = "WAIT...";
-            btnGen.disabled = true;
+            bdown.style.display = 'none';
+            bgen.disabled = true;
+            bgen.innerText = "WAIT...";
 
-            const seed = Math.floor(Math.random() * 2000000);
+            const seed = Math.floor(Math.random() * 9999999);
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux`;
+
+            const tImg = new Image();
+            tImg.crossOrigin = "anonymous";
+            tImg.src = url;
             
-            // Параметры для Pollinations (модель Flux с улучшениями)
-            const params = new URLSearchParams({
-                seed: seed,
-                width: 1024,
-                height: 1024,
-                nologo: 'true',
-                model: 'flux',
-                enhance: 'true'
-            });
-
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params.toString()}`;
-
-            try {
-                const tempImg = new Image();
-                tempImg.crossOrigin = "anonymous";
-                tempImg.src = url;
-                
-                tempImg.onload = () => {
-                    img.src = url;
-                    img.style.display = 'block';
-                    loader.style.display = 'none';
-                    btnGen.innerText = "СОЗДАТЬ";
-                    btnGen.disabled = false;
-                    btnDown.style.display = 'block';
-                };
-                
-                tempImg.onerror = () => { throw new Error(); };
-
-            } catch (e) {
+            tImg.onload = () => {
+                img.src = url;
+                img.style.display = 'block';
                 loader.style.display = 'none';
-                idleText.style.display = 'block';
-                idleText.innerText = "NETWORK ERROR - RETRY";
-                idleText.style.color = "#ef4444";
-                btnGen.disabled = false;
-                btnGen.innerText = "СОЗДАТЬ";
-            }
+                bgen.disabled = false;
+                bgen.innerText = "СОЗДАТЬ";
+                bdown.style.display = 'block';
+                
+                // Легкая вибрация телефона через ВК при успехе
+                vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
+            };
+            
+            tImg.onerror = () => {
+                loader.style.display = 'none';
+                idle.style.display = 'block';
+                idle.innerText = "ERROR";
+                bgen.disabled = false;
+                bgen.innerText = "СОЗДАТЬ";
+            };
         }
 
-        async function downloadImg(e) {
-            if(e) e.stopPropagation();
-            try {
-                const response = await fetch(img.src);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `hit_visual_art_${Date.now()}.jpg`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            } catch (e) {
-                // Фолбэк для мобилок
-                alert("Нажмите на фото и удерживайте для сохранения в галерею");
-            }
+        async function download() {
+            // В ВК лучше всего открывать картинку в новом окне или использовать их нативный метод
+            vkBridge.send("VKWebAppShowImages", {
+                images: [img.src]
+            });
         }
-
-        // Обработка клавиши Enter
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') generate();
-        });
     </script>
 </body>
 </html>
+
 
