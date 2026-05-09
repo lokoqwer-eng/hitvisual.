@@ -1,152 +1,61 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
     <title>HIT VISUAL LUXURY</title>
-    
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Montserrat:wght@400;600;700&display=swap');
-        
-        :root {
-            --neon: #00e5ff;
-            --pink: #ff007b;
-            --bg: #ffffff;
-            --text: #0f172a;
-            --card: rgba(255, 255, 255, 0.98);
-        }
-
-        body.dark {
-            --bg: #0f172a;
-            --text: #f8fafc;
-            --card: rgba(15, 23, 42, 0.98);
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            transition: background 0.3s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        :root { --neon: #00e5ff; --pink: #ff007b; --bg: #ffffff; --text: #0f172a; --card: rgba(255, 255, 255, 0.98); }
+        body.dark { --bg: #0f172a; --text: #f8fafc; --card: rgba(15, 23, 42, 0.98); }
+        body { background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background 0.3s ease; -webkit-tap-highlight-color: transparent; }
         .sync { font-family: 'Syncopate', sans-serif; }
-
-        .glow-title {
-            font-size: 10px;
-            letter-spacing: 0.5em;
-            background: linear-gradient(90deg, var(--neon), var(--pink), #7000ff, var(--neon));
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: rainbow 4s linear infinite;
-        }
+        .glow-title { font-size: 10px; letter-spacing: 0.5em; background: linear-gradient(90deg, var(--neon), var(--pink), #7000ff, var(--neon)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 4s linear infinite; }
         @keyframes rainbow { to { background-position: 200% center; } }
-
-        .art-viewport {
-            flex: 1;
-            margin: 12px;
-            background: #000;
-            border-radius: 28px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.05);
-        }
-
-        #main-img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: none;
-            cursor: pointer;
-        }
-
-        .art-viewport.fs {
-            position: fixed; inset: 0; margin: 0; z-index: 100; border-radius: 0;
-        }
+        .art-viewport { flex: 1; margin: 12px; background: #000; border-radius: 28px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid rgba(255,255,255,0.05); }
+        #main-img { width: 100%; height: 100%; object-fit: cover; display: none; cursor: pointer; }
+        .art-viewport.fs { position: fixed; inset: 0; margin: 0; z-index: 100; border-radius: 0; }
         .art-viewport.fs #main-img { object-fit: contain; }
-
-        .ui-panel {
-            background: var(--card);
-            backdrop-filter: blur(20px);
-            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
-            border-radius: 32px 32px 0 0;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-            z-index: 50;
-        }
-
-        .chip {
-            padding: 8px 14px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            white-space: nowrap;
-            transition: 0.2s;
-        }
+        .ui-panel { background: var(--card); backdrop-filter: blur(20px); padding: 15px 15px calc(20px + env(safe-area-inset-bottom)); border-radius: 32px 32px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); z-index: 50; }
+        .chip { padding: 8px 14px; background: rgba(0,0,0,0.05); border-radius: 12px; font-size: 10px; font-weight: 700; white-space: nowrap; transition: 0.2s; }
         body.dark .chip { background: rgba(255,255,255,0.1); }
         .chip.active { background: var(--text); color: var(--bg); }
-
-        .btn {
-            width: 100%; padding: 16px; border-radius: 18px;
-            font-family: 'Syncopate', sans-serif; font-size: 10px;
-            font-weight: 700; transition: 0.3s;
-            text-transform: uppercase;
-        }
+        .btn { width: 100%; padding: 16px; border-radius: 18px; font-family: 'Syncopate', sans-serif; font-size: 10px; font-weight: 700; transition: 0.3s; text-transform: uppercase; }
         .btn-primary { background: var(--text); color: var(--bg); }
-        
-        .history-scroll {
-            display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px;
-            scrollbar-width: none;
-        }
+        .history-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none; }
         .history-scroll::-webkit-scrollbar { display: none; }
-        .history-thumb {
-            width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0;
-            object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
-            align-items: center; justify-content: center; padding: 20px;
-            backdrop-filter: blur(10px);
-        }
-
+        .history-thumb { width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+        .image-upload { border: 2px dashed rgba(0,229,255,0.3); border-radius: 16px; padding: 12px; text-align: center; transition: 0.2s; }
+        .image-upload:hover { border-color: var(--neon); background: rgba(0,229,255,0.05); }
+        .preview-container { position: relative; margin-top: 10px; }
+        .preview-container img { width: 100%; max-height: 120px; object-fit: cover; border-radius: 12px; }
+        .preview-remove { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #ef4444; border-radius: 50%; border: 2px solid var(--bg); color: white; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         input { font-size: 16px !important; }
+        .achievements-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: linear-gradient(135deg, var(--neon), var(--pink)); color: white; padding: 12px 24px; border-radius: 50px; font-weight: 700; font-size: 11px; z-index: 2000; transition: transform 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .achievements-toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="dark">
 
+    <!-- Ачивки -->
+    <div id="achievements" class="achievements-toast sync">🏆 ДОСТИЖЕНИЕ!</div>
+
     <!-- Рекламное окно -->
     <div id="ad-modal" class="modal-overlay">
         <div class="bg-white dark:bg-slate-900 rounded-[35px] p-8 max-w-sm w-full text-center">
-            <div class="text-6xl mb-6">🎬</div>
-            <h3 class="sync text-[11px] mb-4 tracking-tighter">ЛИМИТ ИСЧЕРПАН</h3>
+            <div class="text-6xl mb-6">🎬</div>            <h3 class="sync text-[11px] mb-4 tracking-tighter">ЛИМИТ ИСЧЕРПАН</h3>
             <p class="text-xs opacity-60 mb-8 px-4">Для разблокировки новой генерации посмотрите рекламу (15 сек)</p>
-            <button id="ad-watch-btn" class="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-30">
-                СМОТРЕТЬ (15 СЕК)
-            </button>
-            <div id="ad-timer-text" class="mt-4 text-[9px] opacity-40 font-bold uppercase tracking-widest hidden">
-                ОСТАЛОСЬ <span id="ad-sec">15</span> СЕК
-            </div>
+            <button id="ad-watch-btn" class="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-30">СМОТРЕТЬ (15 СЕК)</button>
+            <div id="ad-timer-text" class="mt-4 text-[9px] opacity-40 font-bold uppercase tracking-widest hidden">ОСТАЛОСЬ <span id="ad-sec">15</span> СЕК</div>
         </div>
     </div>
 
     <!-- Политика конфиденциальности -->
-    <div id="privacy-modal" class="modal-overlay">
+    <div id="privacy-modal" class="modal-overlay" onclick="this.style.display='none'">
         <div class="bg-white dark:bg-slate-900 rounded-[30px] p-8 max-w-md w-full max-h-[80vh] overflow-y-auto">
             <h3 class="sync text-[12px] mb-6">PRIVACY POLICY</h3>
             <div class="text-[11px] opacity-70 space-y-4 leading-relaxed">
@@ -178,215 +87,232 @@
             <button onclick="document.getElementById('privacy-modal').style.display='flex'" class="text-[8px] opacity-30 sync uppercase tracking-tighter">Privacy</button>
         </div>
 
+        <!-- Загрузка фото -->
+        <div class="mb-3">
+            <label id="upload-label" class="image-upload flex items-center justify-center cursor-pointer">
+                <input type="file" id="ref-image" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                <span class="text-[10px] opacity-60 sync">📷 ЗАГРУЗИТЬ ФОТО (опционально)</span>
+            </label>
+            <div id="preview-container" class="preview-container hidden">
+                <img id="preview-img" src="" alt="Preview">
+                <button onclick="removeImage(event)" class="preview-remove">×</button>
+            </div>        </div>
+
+        <!-- Пресеты + Рандом -->
         <div class="flex gap-2 overflow-x-auto mb-4 no-scrollbar">
             <button onclick="setPrompt('cyber')" class="chip">🌃 КИБЕРПАНК</button>
             <button onclick="setPrompt('fantasy')" class="chip">🐉 ФЭНТЕЗИ</button>
             <button onclick="setPrompt('photo')" class="chip">📸 ПОРТРЕТ</button>
             <button onclick="setPrompt('anime')" class="chip">🌸 АНИМЕ</button>
+            <button onclick="randomPrompt()" class="chip bg-pink-500/10 text-pink-500">🎲 MIX</button>
         </div>
 
+        <!-- Поле ввода -->
         <div class="space-y-3 mb-4">
-            <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/10 dark:border-white/10">
-                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px]" placeholder="Ваша фантазия...">
+            <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/10 dark:border-white/10 relative">
+                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px] pr-8" placeholder="Ваша фантазия...">
+                <button onclick="randomPrompt()" class="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100">🎲</button>
             </div>
         </div>
 
+        <!-- Соотношение сторон -->
         <div class="flex gap-2 mb-4">
             <button onclick="setRatio('1:1', this)" class="chip ratio-btn active">1:1</button>
             <button onclick="setRatio('9:16', this)" class="chip ratio-btn">9:16</button>
             <button onclick="setRatio('16:9', this)" class="chip ratio-btn">16:9</button>
         </div>
 
+        <!-- История -->
         <div class="history-scroll" id="history-box"></div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <!-- Кнопки -->
+        <div class="grid grid-cols-2 gap-3 mt-4">
             <button id="gen-btn" onclick="handleGenerate()" class="btn btn-primary">СОЗДАТЬ</button>
             <button id="save-btn" onclick="downloadArt()" class="btn border border-black/10 dark:border-white/10 hidden">СКАЧАТЬ</button>
         </div>
+        <button id="share-btn" onclick="shareArt()" class="btn border border-black/10 dark:border-white/10 mt-2 hidden">📤 ПОДЕЛИТЬСЯ</button>
     </div>
 
     <script>
         vkBridge.send("VKWebAppInit");
 
-        // --- ЛИМИТЫ ---
+        // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
         const DAILY_LIMIT = 4;
         let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
         let lastDate = localStorage.getItem('hit_gen_date') || '';
         let adCallback = null;
+        let uploadedImage = null;
+        let audioCtx = null;
+        let achievementsUnlocked = JSON.parse(localStorage.getItem('hit_achievements')) || [];
 
+        // === ЗВУКИ (Web Audio API) ===        function initAudio() {
+            if (!audioCtx) {
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+            }
+        }
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'click') { osc.frequency.value = 800; gain.gain.value = 0.03; osc.start(); setTimeout(() => osc.stop(), 40); }
+            if (type === 'success') { osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15); gain.gain.value = 0.08; osc.start(); setTimeout(() => osc.stop(), 150); }
+            if (type === 'error') { osc.frequency.value = 200; gain.gain.value = 0.05; osc.start(); setTimeout(() => osc.stop(), 100); }
+        }
+
+        // === АЧИВКИ ===
+        function checkAchievements() {
+            const list = [
+                { id: 'first', name: 'ПЕРВЫЙ ШАГ', threshold: 1, icon: '🌱' },
+                { id: 'five', name: 'НАЧИНАЮЩИЙ', threshold: 5, icon: '🎨' },
+                { id: 'twenty', name: 'ТВОРЕЦ', threshold: 20, icon: '✨' }
+            ];
+            for (const ach of list) {
+                if (!achievementsUnlocked.includes(ach.id) && genCount >= ach.threshold) {
+                    achievementsUnlocked.push(ach.id);
+                    localStorage.setItem('hit_achievements', JSON.stringify(achievementsUnlocked));
+                    showAchievement(`${ach.icon} ${ach.name}!`);
+                    playSound('success');
+                }
+            }
+        }
+        function showAchievement(text) {
+            const el = document.getElementById('achievements');
+            el.innerText = text;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // === ЛИМИТЫ И РЕКЛАМА ===
         function checkLimits() {
             const today = new Date().toDateString();
-            if(lastDate !== today) {
-                genCount = 0;
-                lastDate = today;
-                localStorage.setItem('hit_gen_count', '0');
-                localStorage.setItem('hit_gen_date', today);
-            }
+            if (lastDate !== today) { genCount = 0; lastDate = today; localStorage.setItem('hit_gen_count', '0'); localStorage.setItem('hit_gen_date', today); }
             updateBadge();
         }
-
         function updateBadge() {
             const rem = Math.max(0, DAILY_LIMIT - genCount);
-            document.getElementById('limit-badge').innerText = rem > 0 ? `✨ ${rem} БЕСПЛАТНО` : `🎬 ПОСЛЕ РЕКЛАМЫ`;
-        }
-
+            document.getElementById('limit-badge').innerText = rem > 0 ? `✨ ${rem} БЕСПЛАТНО` : `🎬 ПОСЛЕ РЕКЛАМЫ`;        }
         function showAd(callback) {
             adCallback = callback;
-            const modal = document.getElementById('ad-modal');
-            const btn = document.getElementById('ad-watch-btn');
-            const timerText = document.getElementById('ad-timer-text');
-            const sec = document.getElementById('ad-sec');
-            
-            modal.style.display = 'flex';
-            btn.disabled = true;
-            btn.innerText = "СМОТРЕТЬ (15 СЕК)";
-            timerText.classList.remove('hidden');
-            
-            let time = 15;
-            sec.innerText = time;
-            const itv = setInterval(() => {
-                time--;
-                sec.innerText = time;
-                if(time <= 0) {
-                    clearInterval(itv);
-                    btn.disabled = false;
-                    btn.innerText = "ГОТОВО ✨";
-                    btn.onclick = () => {
-                        modal.style.display = 'none';
-                        if(adCallback) adCallback(true);
-                        adCallback = null;
-                    };
-                }
-            }, 1000);
+            const modal = document.getElementById('ad-modal'), btn = document.getElementById('ad-watch-btn'), timerText = document.getElementById('ad-timer-text'), sec = document.getElementById('ad-sec');
+            modal.style.display = 'flex'; btn.disabled = true; btn.innerText = "СМОТРЕТЬ (15 СЕК)"; timerText.classList.remove('hidden');
+            let time = 15; sec.innerText = time;
+            const itv = setInterval(() => { time--; sec.innerText = time; if (time <= 0) { clearInterval(itv); btn.disabled = false; btn.innerText = "ГОТОВО ✨"; btn.onclick = () => { modal.style.display = 'none'; if (adCallback) adCallback(true); adCallback = null; }; }}, 1000);
         }
 
-        // --- ГЕНЕРАЦИЯ ---
-        const img = document.getElementById('main-img');
-        const promptIn = document.getElementById('prompt-in');
-        const historyBox = document.getElementById('history-box');
-        const viewport = document.getElementById('viewport');
-        const genBtn = document.getElementById('gen-btn');
+        // === ЗАГРУЗКА ФОТО ===
+        function handleImageUpload(event) {
+            const file = event.target.files[0]; if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { alert('Фото больше 2MB. Выберите меньшее.'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = e.target.result;
+                document.getElementById('preview-img').src = uploadedImage;
+                document.getElementById('preview-container').classList.remove('hidden');
+                document.getElementById('upload-label').classList.add('opacity-50', 'pointer-events-none');
+                playSound('click');
+            };
+            reader.readAsDataURL(file);
+        }
+        function removeImage(e) {
+            if (e) e.stopPropagation();
+            uploadedImage = null;
+            document.getElementById('ref-image').value = '';
+            document.getElementById('preview-container').classList.add('hidden');
+            document.getElementById('upload-label').classList.remove('opacity-50', 'pointer-events-none');
+            playSound('click');
+        }
+
+        // === ГЕНЕРАЦИЯ ===
+        const img = document.getElementById('main-img'), promptIn = document.getElementById('prompt-in'), historyBox = document.getElementById('history-box'), viewport = document.getElementById('viewport'), genBtn = document.getElementById('gen-btn');
         let history = JSON.parse(localStorage.getItem('hit_history')) || [];
         let curW = 1024, curH = 1024;
         let activeTimeout = null;
 
         async function handleGenerate() {
-            checkLimits();
-            if(!promptIn.value) return;
-
-            if(genCount >= DAILY_LIMIT) {
-                showAd((ok) => { if(ok) runGen(); });
-            } else {
-                runGen();
-            }
+            checkLimits(); playSound('click');
+            if (!promptIn.value && !uploadedImage) { promptIn.classList.add('animate-pulse'); setTimeout(() => promptIn.classList.remove('animate-pulse'), 500); return; }
+            if (genCount >= DAILY_LIMIT) { showAd((ok) => { if (ok) runGen(); }); } else { runGen(); }
         }
 
         async function runGen() {
             document.getElementById('loader').classList.remove('hidden');
             document.getElementById('idle').classList.add('hidden');
             img.style.display = 'none';
-            genBtn.disabled = true;
-            genBtn.innerText = "ПРОЦЕСС...";
+            genBtn.disabled = true; genBtn.innerText = "ПРОЦЕСС...";
+            document.getElementById('save-btn').classList.add('hidden');            document.getElementById('share-btn').classList.add('hidden');
 
-            const seed = Math.floor(Math.random()*999999);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptIn.value)}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=flux`;
-
-            const t = new Image();
-            t.crossOrigin = "anonymous";
+            const seed = Math.floor(Math.random() * 999999);
+            let url;
             
-            activeTimeout = setTimeout(() => {
-                alert("Ошибка сети или долгий ответ. Попробуйте еще раз.");
-                resetUI();
-            }, 40000);
+            if (uploadedImage) {
+                // IMG2IMG режим
+                url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptIn.value || 'artistic transformation')}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=flux&strength=0.7&image=${encodeURIComponent(uploadedImage)}`;
+            } else {
+                // TXT2IMG режим
+                url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptIn.value)}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=flux`;
+            }
+
+            const t = new Image(); t.crossOrigin = "anonymous";
+            activeTimeout = setTimeout(() => { playSound('error'); alert("Тайм-аут. Проверьте интернет."); resetUI(); }, 45000);
 
             t.onload = () => {
                 clearTimeout(activeTimeout);
-                img.src = url;
-                img.style.display = 'block';
+                img.src = url; img.style.display = 'block';
                 resetUI();
                 document.getElementById('save-btn').classList.remove('hidden');
+                document.getElementById('share-btn').classList.remove('hidden');
                 
-                if(!history.includes(url)) {
-                    history.unshift(url);
-                    if(history.length > 8) history.pop();
-                    localStorage.setItem('hit_history', JSON.stringify(history));
-                    renderHistory();
-                }
-
-                genCount++;
-                localStorage.setItem('hit_gen_count', genCount);
-                updateBadge();
+                if (!history.includes(url)) { history.unshift(url); if (history.length > 10) history.pop(); localStorage.setItem('hit_history', JSON.stringify(history)); renderHistory(); }
+                
+                genCount++; localStorage.setItem('hit_gen_count', genCount); updateBadge();
+                checkAchievements();
+                playSound('success');
                 vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
             };
-
-            t.onerror = () => {
-                clearTimeout(activeTimeout);
-                alert("Ошибка загрузки. Попробуйте другой запрос.");
-                resetUI();
-            };
-
+            t.onerror = () => { clearTimeout(activeTimeout); playSound('error'); alert("Ошибка. Попробуйте другой запрос."); resetUI(); };
             t.src = url;
         }
 
         function resetUI() {
             document.getElementById('loader').classList.add('hidden');
-            genBtn.disabled = false;
-            genBtn.innerText = "СОЗДАТЬ";
+            genBtn.disabled = false; genBtn.innerText = "СОЗДАТЬ";
         }
 
-        // --- ДОП ФУНКЦИИ ---
-        function setPrompt(t) {
-            const ps = {
-                cyber: "cyberpunk city, neon, futuristic 8k",
-                fantasy: "magic world, dragon, ethereal landscape",
-                photo: "professional portrait, studio lighting, hyperrealism",
-                anime: "high quality anime style, vibrant colors"
-            };
-            promptIn.value = ps[t];
-            promptIn.focus();
-        }
+        // === ДОП ФУНКЦИИ ===
+        const randomPrompts = [
+            "cyberpunk samurai in neon rain, cinematic lighting", "magic forest with glowing mushrooms, ethereal",
+            "futuristic portrait, chrome skin, holographic eyes", "space cat astronaut, nebula background, 8k",
+            "ancient dragon in modern city, photorealistic", "steampunk airship at sunset, detailed",
+            "underwater city, bioluminescent, fantasy", "robot gardener in botanical garden, warm light",
+            "witch in enchanted library, floating books, magical", "neon Tokyo street, rainy night, cinematic",
+            "crystal cave with fairy lights, macro photography", "astronaut planting flag on alien planet",
+            "gothic cathedral in clouds, dramatic lighting", "cybernetic wolf, blue eyes, forest background",
+            "floating islands, waterfalls, fantasy landscape", "retro futurism car, 1950s style, neon",
+            "samurai duel in cherry blossom storm", "deep sea creature, bioluminescent, mysterious",            "steampunk inventor workshop, gears, warm light", "cosmic dragon flying through galaxy"
+        ];
+        function randomPrompt() { playSound('click'); promptIn.value = randomPrompts[Math.floor(Math.random() * randomPrompts.length)]; promptIn.focus(); showAchievement("🎲 Идея найдена!"); }
+        
+        function setPrompt(t) { playSound('click'); const ps = { cyber: "cyberpunk city, neon, futuristic 8k", fantasy: "magic world, dragon, ethereal landscape", photo: "professional portrait, studio lighting, hyperrealism", anime: "high quality anime style, vibrant colors" }; promptIn.value = ps[t]; promptIn.focus(); }
+        
+        function setRatio(r, btn) { document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if(r === '1:1') { curW=1024; curH=1024; viewport.style.aspectRatio = "1/1"; } if(r === '9:16') { curW=768; curH=1344; viewport.style.aspectRatio = "9/16"; } if(r === '16:9') { curW=1216; curH=688; viewport.style.aspectRatio = "16/9"; } }
+        
+        function renderHistory() { historyBox.innerHTML = history.map(u => `<img src="${u}" data-src="${u}" class="history-thumb" onclick="loadFromHistory(this)">`).join(''); }
+        function loadFromHistory(el) { playSound('click'); img.src = el.dataset.src; img.style.display = 'block'; document.getElementById('idle').classList.add('hidden'); document.getElementById('save-btn').classList.remove('hidden'); document.getElementById('share-btn').classList.remove('hidden'); vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"}); }
+        
+        function toggleTheme() { document.body.classList.toggle('dark'); const isD = document.body.classList.contains('dark'); document.getElementById('theme-btn').innerText = isD ? '☀️' : '🌙'; localStorage.setItem('theme', isD ? 'dark' : 'light'); playSound('click'); }
+        function toggleFS() { if (img.src) { viewport.classList.toggle('fs'); playSound('click'); } }
+        
+        async function downloadArt() { if (img.src) { playSound('click'); vkBridge.send("VKWebAppShowImages", { images: [img.src] }); } }
+        async function shareArt() { if (img.src && promptIn.value) { playSound('click'); vkBridge.send("VKWebAppShowWallPostBox", { message: `🎨 Мой арт от HIT VISUAL:\n"${promptIn.value}"`, link: window.location.href }); } }
 
-        function setRatio(r, btn) {
-            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if(r === '1:1') { curW=1024; curH=1024; viewport.style.aspectRatio = "1/1"; }
-            if(r === '9:16') { curW=768; curH=1344; viewport.style.aspectRatio = "9/16"; }
-            if(r === '16:9') { curW=1216; curH=688; viewport.style.aspectRatio = "16/9"; }
-        }
-
-        function renderHistory() {
-            historyBox.innerHTML = history.map(u => `
-                <img src="${u}" data-src="${u}" class="history-thumb" onclick="loadFromHistory(this)">
-            `).join('');
-        }
-
-        function loadFromHistory(el) {
-            img.src = el.dataset.src;
-            img.style.display = 'block';
-            document.getElementById('idle').classList.add('hidden');
-            document.getElementById('save-btn').classList.remove('hidden');
-            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const isD = document.body.classList.contains('dark');
-            document.getElementById('theme-btn').innerText = isD ? '☀️' : '🌙';
-            localStorage.setItem('theme', isD ? 'dark' : 'light');
-        }
-
-        function toggleFS() { if(img.src) viewport.classList.toggle('fs'); }
-
-        async function downloadArt() {
-            if(img.src) vkBridge.send("VKWebAppShowImages", { images: [img.src] });
-        }
-
-        window.onload = () => {
-            checkLimits();
-            renderHistory();
-            if(localStorage.getItem('theme') === 'light') toggleTheme();
-        };
+        // === ИНИЦИАЛИЗАЦИЯ ===
+        window.onload = () => { checkLimits(); renderHistory(); if (localStorage.getItem('theme') === 'light') toggleTheme(); };
+        promptIn.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleGenerate(); });
+        document.addEventListener('click', () => initAudio(), { once: true });
     </script>
 </body>
 </html>
-
