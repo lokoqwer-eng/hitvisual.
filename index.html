@@ -118,7 +118,6 @@
             object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Модальные окна */
         .modal-overlay {
             display: none;
             position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
@@ -126,18 +125,17 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Предотвращение зума на iPhone */
         input { font-size: 16px !important; }
     </style>
 </head>
 <body class="dark">
 
-    <!-- Рекламный таймер -->
+    <!-- Рекламное окно -->
     <div id="ad-modal" class="modal-overlay">
         <div class="bg-white dark:bg-slate-900 rounded-[35px] p-8 max-w-sm w-full text-center">
             <div class="text-6xl mb-6">🎬</div>
             <h3 class="sync text-[11px] mb-4 tracking-tighter">ЛИМИТ ИСЧЕРПАН</h3>
-            <p class="text-xs opacity-60 mb-8 px-4">Для разблокировки новой генерации посмотрите рекламу до конца (15 сек)</p>
+            <p class="text-xs opacity-60 mb-8 px-4">Для разблокировки новой генерации посмотрите рекламу (15 сек)</p>
             <button id="ad-watch-btn" class="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-30">
                 СМОТРЕТЬ (15 СЕК)
             </button>
@@ -147,17 +145,16 @@
         </div>
     </div>
 
-    <!-- Текст политики конфиденциальности -->
-    <div id="privacy-modal" class="modal-overlay" onclick="this.style.display='none'">
+    <!-- Политика конфиденциальности -->
+    <div id="privacy-modal" class="modal-overlay">
         <div class="bg-white dark:bg-slate-900 rounded-[30px] p-8 max-w-md w-full max-h-[80vh] overflow-y-auto">
             <h3 class="sync text-[12px] mb-6">PRIVACY POLICY</h3>
             <div class="text-[11px] opacity-70 space-y-4 leading-relaxed">
-                <p>Приложение "HIT VISUAL LUXURY" не собирает и не передает персональные данные пользователей.</p>
-                <p>Генерация изображений происходит через открытый API Pollinations.ai. Приложение не хранит ваши изображения на сервере.</p>
-                <p>Мы используем локальное хранилище вашего устройства (localStorage) для сохранения истории генераций и счетчика лимитов.</p>
-                <p>Для работы приложения требуется доступ к интернету.</p>
+                <p>Приложение "HIT VISUAL LUXURY" не собирает персональные данные.</p>
+                <p>Генерация происходит через открытый API Pollinations.ai.</p>
+                <p>Мы используем localStorage для истории и лимитов.</p>
             </div>
-            <button class="btn btn-primary mt-8">ПОНЯТНО</button>
+            <button onclick="document.getElementById('privacy-modal').style.display='none'" class="btn btn-primary mt-8">ПОНЯТНО</button>
         </div>
     </div>
 
@@ -211,7 +208,7 @@
     <script>
         vkBridge.send("VKWebAppInit");
 
-        // --- МОНЕТИЗАЦИЯ И ЛИМИТЫ ---
+        // --- ЛИМИТЫ ---
         const DAILY_LIMIT = 4;
         let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
         let lastDate = localStorage.getItem('hit_gen_date') || '';
@@ -246,6 +243,7 @@
             timerText.classList.remove('hidden');
             
             let time = 15;
+            sec.innerText = time;
             const itv = setInterval(() => {
                 time--;
                 sec.innerText = time;
@@ -270,6 +268,7 @@
         const genBtn = document.getElementById('gen-btn');
         let history = JSON.parse(localStorage.getItem('hit_history')) || [];
         let curW = 1024, curH = 1024;
+        let activeTimeout = null;
 
         async function handleGenerate() {
             checkLimits();
@@ -294,32 +293,39 @@
 
             const t = new Image();
             t.crossOrigin = "anonymous";
-            t.src = url;
             
-            const timeout = setTimeout(() => {
-                if(genBtn.disabled) {
-                    alert("Ошибка сети. Попробуйте еще раз.");
-                    resetUI();
-                }
-            }, 30000);
+            activeTimeout = setTimeout(() => {
+                alert("Ошибка сети или долгий ответ. Попробуйте еще раз.");
+                resetUI();
+            }, 40000);
 
             t.onload = () => {
-                clearTimeout(timeout);
+                clearTimeout(activeTimeout);
                 img.src = url;
                 img.style.display = 'block';
                 resetUI();
                 document.getElementById('save-btn').classList.remove('hidden');
                 
-                history.unshift(url);
-                if(history.length > 8) history.pop();
-                localStorage.setItem('hit_history', JSON.stringify(history));
-                renderHistory();
+                if(!history.includes(url)) {
+                    history.unshift(url);
+                    if(history.length > 8) history.pop();
+                    localStorage.setItem('hit_history', JSON.stringify(history));
+                    renderHistory();
+                }
 
                 genCount++;
                 localStorage.setItem('hit_gen_count', genCount);
                 updateBadge();
                 vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
             };
+
+            t.onerror = () => {
+                clearTimeout(activeTimeout);
+                alert("Ошибка загрузки. Попробуйте другой запрос.");
+                resetUI();
+            };
+
+            t.src = url;
         }
 
         function resetUI() {
@@ -337,6 +343,7 @@
                 anime: "high quality anime style, vibrant colors"
             };
             promptIn.value = ps[t];
+            promptIn.focus();
         }
 
         function setRatio(r, btn) {
@@ -349,8 +356,16 @@
 
         function renderHistory() {
             historyBox.innerHTML = history.map(u => `
-                <img src="${u}" class="history-thumb" onclick="img.src='${u}';img.style.display='block';document.getElementById('idle').classList.add('hidden');">
+                <img src="${u}" data-src="${u}" class="history-thumb" onclick="loadFromHistory(this)">
             `).join('');
+        }
+
+        function loadFromHistory(el) {
+            img.src = el.dataset.src;
+            img.style.display = 'block';
+            document.getElementById('idle').classList.add('hidden');
+            document.getElementById('save-btn').classList.remove('hidden');
+            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
         }
 
         function toggleTheme() {
@@ -363,7 +378,7 @@
         function toggleFS() { if(img.src) viewport.classList.toggle('fs'); }
 
         async function downloadArt() {
-            vkBridge.send("VKWebAppShowImages", { images: [img.src] });
+            if(img.src) vkBridge.send("VKWebAppShowImages", { images: [img.src] });
         }
 
         window.onload = () => {
@@ -374,5 +389,4 @@
     </script>
 </body>
 </html>
-
 
