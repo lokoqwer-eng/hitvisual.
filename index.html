@@ -16,12 +16,6 @@
         :root {
             --neon: #00e5ff;
             --pink: #ff007b;
-            --bg: #ffffff;
-            --text: #0f172a;
-            --card: rgba(255, 255, 255, 0.98);
-        }
-
-        body.dark {
             --bg: #05070a;
             --text: #f8fafc;
             --card: rgba(13, 17, 23, 0.98);
@@ -36,7 +30,6 @@
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
-            transition: background 0.3s ease;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -55,22 +48,22 @@
 
         .art-viewport {
             flex: 1;
-            margin: 12px;
+            margin: 15px;
             background: #000;
-            border-radius: 28px;
+            border-radius: 32px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         #main-img {
             width: 100%; height: 100%;
             object-fit: cover;
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.8s ease;
             cursor: pointer;
         }
 
@@ -81,142 +74,129 @@
 
         .ui-panel {
             background: var(--card);
-            backdrop-filter: blur(20px);
-            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
-            border-radius: 32px 32px 0 0;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(25px);
+            padding: 20px 20px calc(25px + env(safe-area-inset-bottom));
+            border-radius: 40px 40px 0 0;
+            box-shadow: 0 -15px 50px rgba(0,0,0,0.6);
             z-index: 50;
             border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         .chip {
-            padding: 8px 14px;
-            background: rgba(128,128,128,0.1);
-            border-radius: 14px;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
             font-size: 10px;
             font-weight: 700;
             white-space: nowrap;
-            transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
         }
-        .chip.active { background: var(--neon); color: #000; }
+        .chip.active { background: var(--neon); color: #000; border-color: var(--neon); }
 
         .btn {
-            width: 100%; padding: 16px; border-radius: 18px;
+            width: 100%; padding: 18px; border-radius: 20px;
             font-family: 'Syncopate', sans-serif; font-size: 10px;
             font-weight: 700; transition: 0.3s;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .btn-primary { 
             background: linear-gradient(135deg, var(--neon), #00a2ff); 
             color: #000;
-            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 229, 255, 0.2);
         }
-        .btn-primary:disabled { opacity: 0.3; filter: grayscale(1); }
+        .btn-primary:disabled { opacity: 0.2; }
         
-        .history-thumb {
-            width: 55px; height: 55px; border-radius: 14px; flex-shrink: 0;
-            object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s;
-        }
-        .history-thumb:active { transform: scale(0.9); }
-
         .modal-overlay {
             display: none;
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000;
-            align-items: center; justify-content: center; padding: 20px;
-            backdrop-filter: blur(15px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000;
+            align-items: center; justify-content: center; padding: 25px;
+            backdrop-filter: blur(20px);
         }
 
         .ad-placeholder {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 2px dashed rgba(0, 229, 255, 0.2);
-            border-radius: 30px;
-            padding: 40px 20px;
+            background: linear-gradient(160deg, #111827, #020617);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 35px;
+            padding: 50px 20px;
             width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 229, 255, 0.1);
         }
 
         .progress-line {
             position: absolute; top: 0; left: 0; height: 3px;
             background: var(--neon); width: 0%; transition: width 0.4s ease;
-            z-index: 20; box-shadow: 0 0 15px var(--neon);
+            z-index: 20;
         }
 
         input { font-size: 16px !important; color: #fff !important; }
-        ::placeholder { color: rgba(255,255,255,0.3); }
     </style>
 </head>
-<body class="dark">
+<body>
 
-    <!-- СТИЛЬНЫЙ РЕКЛАМНЫЙ ПОСТЕР -->
+    <!-- РЕКЛАМНЫЙ БАННЕР -->
     <div id="ad-modal" class="modal-overlay">
         <div class="max-w-sm w-full text-center">
-            <div class="ad-placeholder mb-8 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-cyan-500/5 animate-pulse"></div>
-                <div class="relative z-10">
-                    <div class="text-4xl mb-4">🚀</div>
-                    <h3 class="sync text-[12px] text-cyan-400 mb-2 tracking-[4px]">ВАША РЕКЛАМА</h3>
-                    <p class="text-[9px] opacity-40 uppercase tracking-widest leading-loose">
-                        Охват 100,000+ креаторов<br>
-                        Интеграция в поток ИИ<br>
-                        Связь: @tg_reklama
-                    </p>
-                </div>
+            <div class="ad-placeholder mb-10">
+                <div class="text-5xl mb-6 animate-bounce">💎</div>
+                <h3 class="sync text-[13px] text-cyan-400 mb-3 tracking-[5px]">МЕСТО СВОБОДНО</h3>
+                <p class="text-[9px] opacity-40 uppercase tracking-[3px] leading-relaxed">
+                    Ваш бренд в центре ИИ-потока<br>
+                    Премиальная аудитория<br>
+                    TG: @your_ads_here
+                </p>
             </div>
             
-            <button id="ad-watch-btn" class="w-full py-5 bg-white text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-30 transition-all">
-                СМОТРЕТЬ РЕКЛАМУ (15 С)
+            <button id="ad-watch-btn" class="w-full py-6 bg-white text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-20 transition-all">
+                СМОТРЕТЬ (15 С)
             </button>
-            <div id="ad-timer-text" class="mt-6 text-[9px] text-cyan-400/50 font-bold uppercase tracking-[3px] hidden">
-                ЗАГРУЗКА БОНУСА: <span id="ad-sec">15</span> С
-            </div>
         </div>
     </div>
 
-    <div class="pt-10 pb-2 px-6 flex justify-between items-center">
+    <div class="pt-12 pb-4 px-8 flex justify-between items-center">
         <div class="glow-title sync uppercase">HIT VISUAL LUXURY</div>
-        <button onclick="toggleTheme()" id="theme-btn" class="text-xl">☀️</button>
+        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#00e5ff]"></div>
     </div>
 
     <div class="art-viewport" id="viewport">
         <div id="p-line" class="progress-line"></div>
         <div id="loader" class="hidden absolute flex-col items-center z-30">
-            <div class="w-10 h-10 border-2 border-cyan-500/10 border-t-cyan-400 rounded-full animate-spin"></div>
-            <div class="mt-4 text-[7px] tracking-[5px] text-cyan-400/60 font-bold sync uppercase">Ai Rendering</div>
+            <div class="w-12 h-12 border-2 border-cyan-400/10 border-t-cyan-400 rounded-full animate-spin"></div>
+            <div class="mt-6 text-[8px] tracking-[6px] text-cyan-400/50 font-bold sync uppercase">Dreaming...</div>
         </div>
-        <div id="idle" class="sync opacity-20 text-[8px] tracking-[6px] text-white text-center px-10 uppercase">Create Your Vision</div>
+        <div id="idle" class="sync opacity-20 text-[9px] tracking-[8px] text-white text-center px-10 uppercase">Luxury AI Engine</div>
         <img id="main-img" src="" alt="AI Art" onclick="toggleFS()" style="opacity:0">
     </div>
 
     <div class="ui-panel">
-        <div class="flex justify-between items-center mb-5">
-            <div id="limit-badge" class="chip !py-1 bg-cyan-500/5 text-cyan-400 border border-cyan-400/20">✨ 4 БЕСПЛАТНО</div>
-            <div id="status-text" class="text-[7px] opacity-30 sync uppercase tracking-[2px]">Engine: Turbo v3</div>
+        <div class="flex justify-between items-center mb-6">
+            <div id="limit-badge" class="chip !py-1 bg-cyan-500/5 text-cyan-400 border-none">✨ 4 LEFT</div>
+            <div class="text-[7px] opacity-20 sync uppercase tracking-[3px]">Stable Turbo v3</div>
         </div>
 
-        <div class="flex gap-2 overflow-x-auto mb-5 no-scrollbar">
-            <button onclick="setPrompt('cyber')" class="chip">КИБЕРПАНК</button>
-            <button onclick="setPrompt('fantasy')" class="chip">ФЭНТЕЗИ</button>
-            <button onclick="setPrompt('photo')" class="chip">ПОРТРЕТ</button>
-            <button onclick="setPrompt('anime')" class="chip">АНИМЕ</button>
+        <div class="flex gap-2 overflow-x-auto mb-6 no-scrollbar">
+            <button onclick="setPrompt('cyber')" class="chip active" id="chip-cyber">КИБЕРПАНК</button>
+            <button onclick="setPrompt('fantasy')" class="chip" id="chip-fantasy">ФЭНТЕЗИ</button>
+            <button onclick="setPrompt('photo')" class="chip" id="chip-photo">ПОРТРЕТ</button>
+            <button onclick="setPrompt('anime')" class="chip" id="chip-anime">АНИМЕ</button>
         </div>
 
-        <div class="mb-5">
-            <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
-                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[14px] mono" placeholder="Опишите словами ваш шедевр...">
+        <div class="mb-6">
+            <div class="bg-white/[0.03] rounded-2xl p-5 border border-white/[0.05]">
+                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px] font-medium" placeholder="Что создадим?">
             </div>
         </div>
 
-        <div class="flex gap-2 mb-5">
+        <div class="flex gap-3 mb-8">
             <button onclick="setRatio('1:1', this)" class="chip ratio-btn active">1:1</button>
             <button onclick="setRatio('9:16', this)" class="chip ratio-btn">9:16</button>
             <button onclick="setRatio('16:9', this)" class="chip ratio-btn">16:9</button>
         </div>
 
-        <div class="history-scroll flex gap-3 overflow-x-auto mb-5 no-scrollbar" id="history-box"></div>
-
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-4">
             <button id="gen-btn" onclick="handleGenerate()" class="btn btn-primary">СОЗДАТЬ</button>
-            <button id="save-btn" onclick="downloadArt()" class="btn bg-white/5 border border-white/10 text-white hidden">СКАЧАТЬ</button>
+            <button id="save-btn" onclick="downloadArt()" class="btn bg-white/[0.03] text-white opacity-0 pointer-events-none transition-all duration-500">СКАЧАТЬ</button>
         </div>
     </div>
 
@@ -227,7 +207,6 @@
         let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
         let lastDate = localStorage.getItem('hit_gen_date') || '';
         let isGenerating = false;
-        let history = JSON.parse(localStorage.getItem('hit_history')) || [];
         let curW = 768, curH = 768;
 
         function checkLimits() {
@@ -244,19 +223,14 @@
         function updateBadge() {
             const rem = Math.max(0, DAILY_LIMIT - genCount);
             const badge = document.getElementById('limit-badge');
-            if(rem > 0) {
-                badge.innerText = `✨ ${rem} БЕСПЛАТНО`;
-                badge.className = "chip !py-1 bg-cyan-500/5 text-cyan-400 border border-cyan-400/20";
-            } else {
-                badge.innerText = `🎬 СМОТРЕТЬ РЕКЛАМУ`;
-                badge.className = "chip !py-1 bg-pink-500/10 text-pink-400 border border-pink-400/20";
-            }
+            badge.innerText = rem > 0 ? `✨ ${rem} LEFT` : `🎬 WATCH AD`;
+            badge.style.color = rem > 0 ? '#00e5ff' : '#ff007b';
         }
 
         async function handleGenerate() {
             if(isGenerating) return;
-            const val = document.getElementById('prompt-in').value;
-            if(!val) return;
+            const prompt = document.getElementById('prompt-in').value;
+            if(!prompt) return;
 
             checkLimits();
             if(genCount >= DAILY_LIMIT) {
@@ -271,43 +245,41 @@
             const loader = document.getElementById('loader');
             const idle = document.getElementById('idle');
             const genBtn = document.getElementById('gen-btn');
+            const saveBtn = document.getElementById('save-btn');
             const pLine = document.getElementById('p-line');
             const mainImg = document.getElementById('main-img');
 
             loader.classList.remove('hidden');
             idle.classList.add('hidden');
             genBtn.disabled = true;
-            genBtn.innerText = "ГЕНЕРАЦИЯ...";
+            genBtn.innerText = "WAIT...";
             pLine.style.width = "10%";
 
-            // Пытаемся обойти перегрузку: меняем сид и добавляем случайные токены
-            const seed = Math.floor(Math.random()*10000000);
+            const seed = Math.floor(Math.random()*9999999);
             const userPrompt = document.getElementById('prompt-in').value;
-            const finalPrompt = encodeURIComponent(userPrompt + ", highly detailed, masterpiece, 8k, luxury style");
+            const finalPrompt = encodeURIComponent(userPrompt + ", highly detailed digital art, 8k, cinematic, luxury");
             
-            // ДВИЖОК ТУРБО (САМЫЙ БЫСТРЫЙ)
+            // Основной движок
             const url = `https://image.pollinations.ai/prompt/${finalPrompt}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=turbo&enhance=false`;
 
             let prg = 10;
             const prgItv = setInterval(() => {
-                if(prg < 95) prg += (95 - prg) * 0.1;
+                if(prg < 90) prg += 2;
                 pLine.style.width = prg + "%";
             }, 300);
 
             const t = new Image();
             t.crossOrigin = "anonymous";
             
-            const timeout = setTimeout(() => {
+            // Таймер смены движка при задержке
+            const fallbackTimer = setTimeout(() => {
                 if(isGenerating) {
-                    clearInterval(prgItv);
-                    // ЗАПАСНОЙ ВАРИАНТ ПРИ ТАЙМАУТЕ: меняем модель на базовую если турбо лежит
-                    const fallbackUrl = `https://image.pollinations.ai/prompt/${finalPrompt}?seed=${seed+1}&width=${curW}&height=${curH}&nologo=true`;
-                    t.src = fallbackUrl;
+                    t.src = `https://image.pollinations.ai/prompt/${finalPrompt}?seed=${seed+1}&width=${curW}&height=${curH}&nologo=true`;
                 }
-            }, 12000); // Если турбо не ответил за 12 сек, пробуем базу
+            }, 10000);
 
             t.onload = () => {
-                clearTimeout(timeout);
+                clearTimeout(fallbackTimer);
                 clearInterval(prgItv);
                 pLine.style.width = "100%";
                 
@@ -319,13 +291,9 @@
                 genBtn.disabled = false;
                 genBtn.innerText = "СОЗДАТЬ";
                 
-                if(!history.includes(t.src)) {
-                    history.unshift(t.src);
-                    if(history.length > 10) history.pop();
-                    localStorage.setItem('hit_history', JSON.stringify(history));
-                    renderHistory();
-                }
-
+                // Показываем кнопку скачивания
+                saveBtn.classList.remove('opacity-0', 'pointer-events-none');
+                
                 genCount++;
                 localStorage.setItem('hit_gen_count', genCount);
                 updateBadge();
@@ -337,7 +305,7 @@
             t.onerror = () => {
                 clearInterval(prgItv);
                 pLine.style.width = "0%";
-                alert("Сервер ИИ перегружен. Попробуйте через минуту.");
+                alert("Ошибка ИИ. Попробуйте другой запрос.");
                 resetUI();
             };
 
@@ -353,12 +321,14 @@
 
         function setPrompt(t) {
             const ps = {
-                cyber: "cyberpunk luxury car in neon city, futuristic",
-                fantasy: "ethereal diamond dragon, crystal cave, glowing",
-                photo: "stunning portrait of a queen, gold jewelry, studio light",
-                anime: "luxury anime room, sunset view, lo-fi aesthetic"
+                cyber: "cyberpunk luxury car in neon city",
+                fantasy: "ethereal magic dragon in crystal cave",
+                photo: "fashion model portrait, gold lighting",
+                anime: "luxury anime aesthetic room, lofi vibe"
             };
             document.getElementById('prompt-in').value = ps[t];
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            document.getElementById('chip-' + t).classList.add('active');
             vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
         }
 
@@ -370,41 +340,21 @@
             if(r === '16:9') { curW=896; curH=512; viewport.style.aspectRatio = "16/9"; }
         }
 
-        function renderHistory() {
-            const box = document.getElementById('history-box');
-            box.innerHTML = history.map(u => `
-                <img src="${u}" class="history-thumb" onclick="loadFromHistory('${u}')">
-            `).join('');
-        }
-
-        function loadFromHistory(url) {
-            if(isGenerating) return;
-            const mainImg = document.getElementById('main-img');
-            mainImg.src = url;
-            mainImg.style.opacity = "1";
-            document.getElementById('idle').classList.add('hidden');
-            document.getElementById('save-btn').classList.remove('hidden');
-        }
-
         function showAdModal() {
             const modal = document.getElementById('ad-modal');
             const btn = document.getElementById('ad-watch-btn');
-            const timer = document.getElementById('ad-timer-text');
-            const sec = document.getElementById('ad-sec');
             
             modal.style.display = 'flex';
             btn.disabled = true;
-            timer.classList.remove('hidden');
             
             let time = 15;
-            sec.innerText = time;
             const itv = setInterval(() => {
                 time--;
-                sec.innerText = time;
+                btn.innerText = `СМОТРЕТЬ (${time} С)`;
                 if(time <= 0) {
                     clearInterval(itv);
                     btn.disabled = false;
-                    btn.innerText = "ПОЛУЧИТЬ ГЕНЕРАЦИЮ ✨";
+                    btn.innerText = "ПОЛУЧИТЬ ✨";
                     btn.onclick = () => {
                         modal.style.display = 'none';
                         genCount = 0; 
@@ -413,12 +363,6 @@
                     };
                 }
             }, 1000);
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const isD = document.body.classList.contains('dark');
-            document.getElementById('theme-btn').innerText = isD ? '☀️' : '🌙';
         }
 
         function toggleFS() { 
@@ -433,10 +377,7 @@
             }
         }
 
-        window.onload = () => {
-            checkLimits();
-            renderHistory();
-        };
+        window.onload = checkLimits;
     </script>
 </body>
 </html>
