@@ -1,102 +1,210 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HIT VISUAL | FREE AI</title>
+    <title>HIT VISUAL | AI PODCAST</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=JetBrains+Mono&display=swap');
         
-        :root { --neon: #00f2ff; --bg: #07090f; }
-        body { background: var(--bg); color: #fff; font-family: 'Unbounded', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
-        
+        :root { 
+            --neon: #00f2ff; 
+            --bg: #07090f; 
+        }
+
+        /* Исправление высоты для мобильных устройств */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Unbounded', sans-serif;
+            color: #fff;
+        }
+
         .sync { font-family: 'Unbounded', sans-serif; font-weight: 900; }
         .mono { font-family: 'JetBrains Mono', monospace; }
 
+        /* Верхняя панель */
+        .header {
+            padding-top: calc(env(safe-area-inset-top) + 20px);
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+        }
+
+        /* Главный экран - занимает всё свободное место */
         .viewport {
-            flex: 1; margin: 12px; background: #000; border-radius: 30px;
-            position: relative; overflow: hidden; border: 1px solid rgba(0, 242, 255, 0.2);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+            flex-grow: 1;
+            margin: 0 15px;
+            background: #000;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #main-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 1s ease; opacity: 0; }
 
-        .ui-panel {
-            background: rgba(10, 12, 18, 0.98); backdrop-filter: blur(20px);
-            padding: 20px 20px calc(25px + env(safe-area-inset-bottom));
-            border-radius: 40px 40px 0 0; border-top: 1px solid rgba(255,255,255,0.08);
+        #main-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.8s ease;
+            opacity: 0;
         }
 
+        /* Вебка ведущего */
         .host-cam {
-            position: absolute; bottom: 20px; right: 20px; width: 80px; height: 100px;
-            background: rgba(0,0,0,0.8); border: 1.5px solid var(--neon);
-            border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 75px;
+            height: 95px;
+            background: rgba(0,0,0,0.85);
+            border: 1.5px solid var(--neon);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             z-index: 30;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
         }
 
         .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; border-radius: 1px; margin: 0 1px; }
 
-        .btn-mode {
-            padding: 8px 16px; border-radius: 14px; font-size: 9px; font-weight: 700;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s;
+        /* Нижняя панель */
+        .ui-panel {
+            padding: 20px 20px calc(env(safe-area-inset-bottom) + 20px);
+            background: rgba(10, 12, 18, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 40px 40px 0 0;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: 15px;
         }
-        .btn-mode.active { background: var(--neon); color: #000; border-color: var(--neon); }
 
-        input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); width: 100%; padding: 15px; border-radius: 18px; outline: none; color: #fff; font-size: 14px; }
-        
-        .status-dot { width: 6px; height: 6px; background: #ff0000; border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.2); } }
+        .btn-mode {
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+        .btn-mode.active {
+            background: var(--neon);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+        }
+
+        input {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 100%;
+            padding: 16px;
+            border-radius: 20px;
+            outline: none;
+            color: #fff;
+            font-size: 16px; /* Предотвращает зум в iOS */
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.4);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .dot { width: 6px; height: 6px; background: #ff004c; border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Загрузчик */
+        #loader {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
 
-    <div class="pt-10 pb-2 px-6 flex justify-between items-center">
-        <div>
-            <div class="text-[12px] sync tracking-tighter text-[#00f2ff]">HIT VISUAL</div>
-            <div class="text-[7px] opacity-40 mono uppercase tracking-[3px]">FREE AI CORE</div>
+    <div id="loader">
+        <div class="text-cyan-400 sync text-2xl animate-pulse mb-2">HIT VISUAL</div>
+        <div class="w-12 h-0.5 bg-cyan-900 overflow-hidden">
+            <div class="w-full h-full bg-cyan-400 -translate-x-full animate-[loading_1.5s_infinite]"></div>
         </div>
-        <div class="flex gap-2">
-            <button id="mode-auto" onclick="setMode('auto')" class="btn-mode active">ЭФИР</button>
-            <button id="mode-manual" onclick="setMode('manual')" class="btn-mode">МАСТЕР</button>
+        <style>@keyframes loading { to { transform: translateX(100%); } }</style>
+    </div>
+
+    <div class="header">
+        <div>
+            <div class="text-[14px] sync tracking-tighter text-[#00f2ff]">HIT VISUAL</div>
+            <div class="text-[8px] opacity-40 mono tracking-[3px]">FREE AI PODCAST</div>
+        </div>
+        <div class="flex gap-2 p-1 bg-white/5 rounded-2xl">
+            <button id="m-auto" onclick="setMode('auto')" class="btn-mode active">ЭФИР</button>
+            <button id="m-man" onclick="setMode('manual')" class="btn-mode">МАСТЕР</button>
         </div>
     </div>
 
     <div class="viewport" id="stage">
-        <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 hidden">
+        <img id="main-img" src="" alt="AI ART">
+        
+        <div id="inner-loader" class="absolute hidden flex flex-col items-center">
             <div class="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <img id="main-img" src="">
-        
-        <div class="host-cam" id="host">
-            <div class="text-[7px] font-bold text-[#00f2ff] mb-2 uppercase">AI HOST</div>
+
+        <div class="host-cam">
+            <div class="text-[7px] font-bold text-[#00f2ff] mb-2">AI HOST</div>
             <div class="flex items-end h-[22px]" id="viz"></div>
         </div>
     </div>
 
     <div class="ui-panel">
         <div id="auto-ui">
-            <div class="flex items-center gap-2 mb-3">
-                <div class="status-dot"></div>
-                <div class="text-[8px] mono text-white/50 uppercase tracking-widest">Бесконечный подкаст</div>
+            <div class="status-badge">
+                <div class="dot"></div> LIVE STREAM
             </div>
-            <div id="ai-text" class="text-[11px] leading-relaxed text-white/70 italic border-l border-cyan-900 pl-3">
-                Подключаемся к визуальному потоку...
+            <div id="ai-text" class="text-[12px] leading-relaxed text-white/80 italic border-l-2 border-cyan-500/30 pl-4 py-1">
+                "Синхронизация с цифровым потоком..."
             </div>
         </div>
 
         <div id="manual-ui" class="hidden">
-            <input type="text" id="user-prompt" placeholder="Ваша идея для арта...">
-            <button onclick="generateManual()" class="w-full mt-3 py-4 bg-[#00f2ff] text-black rounded-2xl font-black sync text-[10px]">СОЗДАТЬ</button>
+            <input type="text" id="user-prompt" placeholder="Опишите новый хит...">
+            <button onclick="manualGenerate()" class="w-full mt-4 py-4 bg-[#00f2ff] text-black rounded-2xl font-black sync text-[11px] active:scale-95 transition-transform">
+                СОЗДАТЬ
+            </button>
         </div>
     </div>
 
 <script>
     vkBridge.send("VKWebAppInit");
     
-    let currentMode = 'auto';
+    let mode = 'auto';
     let isSpeaking = false;
     const phrases = [
         "HIT VISUAL — это точка, где цифровое становится реальным.",
@@ -106,94 +214,72 @@
         "Визуальная революция продолжается. Только премиальный контент."
     ];
 
-    // Визуализатор
+    // Визуализатор голоса
     const viz = document.getElementById('viz');
     for(let i=0; i<6; i++) {
-        const b = document.createElement('div');
-        b.className = 'v-bar';
-        viz.appendChild(b);
+        const b = document.createElement('div'); b.className = 'v-bar'; viz.appendChild(b);
     }
-
-    function animateBars() {
+    function animateViz() {
         const bars = document.getElementsByClassName('v-bar');
-        for(let b of bars) {
-            b.style.height = (isSpeaking ? Math.random()*20 + 2 : 2) + 'px';
-        }
-        requestAnimationFrame(animateBars);
+        for(let b of bars) b.style.height = (isSpeaking ? Math.random()*22 + 2 : 2) + 'px';
+        requestAnimationFrame(animateViz);
     }
-    animateBars();
+    animateViz();
 
     function setMode(m) {
-        currentMode = m;
-        document.getElementById('mode-auto').classList.toggle('active', m === 'auto');
-        document.getElementById('mode-manual').classList.toggle('active', m === 'manual');
+        mode = m;
+        document.getElementById('m-auto').classList.toggle('active', m === 'auto');
+        document.getElementById('m-man').classList.toggle('active', m === 'manual');
         document.getElementById('auto-ui').classList.toggle('hidden', m === 'manual');
         document.getElementById('manual-ui').classList.toggle('hidden', m === 'auto');
-        if(m === 'auto') runAuto();
+        if(m === 'auto') startAuto();
     }
 
-    // Озвучка через браузер (бесплатно)
     function speak(text) {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'ru-RU';
-        msg.rate = 1.1;
-        msg.pitch = 0.9;
-        msg.onstart = () => { isSpeaking = true; };
-        msg.onend = () => { isSpeaking = false; };
-        window.speechSynthesis.speak(msg);
+        const m = new SpeechSynthesisUtterance(text);
+        m.lang = 'ru-RU'; m.rate = 1; m.pitch = 0.9;
+        m.onstart = () => isSpeaking = true;
+        m.onend = () => isSpeaking = false;
+        window.speechSynthesis.speak(m);
     }
 
-    async function generateManual() {
-        const p = document.getElementById('user-prompt').value;
-        if(!p) return;
-        document.getElementById('loader').classList.remove('hidden');
-        const seed = Math.floor(Math.random()*100000);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=1024&height=1280&nologo=true&seed=${seed}&model=flux`;
+    async function startAuto() {
+        if(mode !== 'auto') return;
+        const text = phrases[Math.floor(Math.random()*phrases.length)];
+        document.getElementById('ai-text').innerText = text;
+        
+        const seed = Math.floor(Math.random()*999999);
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent("ultra realistic luxury futuristic art hit visual style 8k")}?seed=${seed}&nologo=true&width=1024&height=1280`;
         
         const img = document.getElementById('main-img');
-        img.style.opacity = 0;
+        img.src = url;
+        img.onload = () => {
+            document.getElementById('loader').style.display = 'none';
+            img.style.opacity = 1;
+            speak(text);
+            setTimeout(() => { if(mode === 'auto') startAuto(); }, 10000);
+        };
+    }
+
+    async function manualGenerate() {
+        const p = document.getElementById('user-prompt').value;
+        if(!p) return;
+        document.getElementById('inner-loader').classList.remove('hidden');
+        const img = document.getElementById('main-img');
+        img.style.opacity = 0.3;
+        
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?seed=${Math.random()}&nologo=true&width=1024&height=1280`;
         img.src = url;
         img.onload = () => {
             img.style.opacity = 1;
-            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('inner-loader').classList.add('hidden');
             vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
         };
     }
 
-    async function runAuto() {
-        if(currentMode !== 'auto') return;
-        
-        // 1. Берем фразу (можно заменить на запрос к бесплатному текстовому API, но фразы надежнее без ключей)
-        const text = phrases[Math.floor(Math.random()*phrases.length)];
-        document.getElementById('ai-text').innerText = text;
-        
-        // 2. Генерируем картинку под "хит"
-        const prompt = "ultra realistic cinematic art, hit visual luxury aesthetic, futuristic, 8k, dark background";
-        const seed = Math.floor(Math.random()*1000000);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1280&nologo=true&seed=${seed}`;
-        
-        const img = document.getElementById('main-img');
-        img.style.opacity = 0;
-        img.src = url;
-        
-        img.onload = () => {
-            img.style.opacity = 1;
-            speak(text);
-            
-            // Пауза перед следующим хитом
-            setTimeout(() => {
-                if(currentMode === 'auto') runAuto();
-            }, 8000);
-        };
-    }
-
-    window.onload = () => {
-        runAuto();
-    };
+    window.onload = startAuto;
 </script>
 </body>
 </html>
-
-```
