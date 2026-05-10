@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HIT VISUAL | SPEED MASTER</title>
+    <title>HIT VISUAL | TURBO STREAM</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -19,195 +19,223 @@
         .mono { font-family: 'JetBrains Mono', monospace; }
 
         .viewport {
-            flex: 1; margin: 10px; background: #000; border-radius: 20px;
+            flex: 1; margin: 12px; background: #000; border-radius: 24px;
             position: relative; overflow: hidden; border: 1px solid rgba(0, 242, 255, 0.15);
+            display: flex; align-items: center; justify-content: center;
         }
-        #main-img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.5s ease, opacity 0.5s ease; opacity: 0; }
-        
-        /* Индикатор прогресса генерации */
-        #gen-progress {
+        #main-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s ease; opacity: 0; z-index: 10; }
+        #placeholder { position: absolute; inset: 0; background: linear-gradient(45deg, #05070a, #0a0d12); z-index: 1; }
+
+        .progress-line {
             position: absolute; top: 0; left: 0; height: 3px; width: 0%;
-            background: var(--neon); box-shadow: 0 0 10px var(--neon);
+            background: var(--neon); box-shadow: 0 0 15px var(--neon);
             transition: width 0.3s; z-index: 100;
         }
 
         .host-cam {
-            position: absolute; bottom: 12px; right: 12px; width: 60px; height: 80px;
-            background: rgba(0,0,0,0.8); border: 1px solid var(--neon);
-            border-radius: 10px; display: flex; flex-direction: column;
+            position: absolute; bottom: 12px; right: 12px; width: 65px; height: 85px;
+            background: rgba(0,0,0,0.85); border: 1px solid var(--neon);
+            border-radius: 12px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 30;
         }
-        .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; margin: 0 1px; }
+        .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; margin: 0 1.5px; border-radius: 2px; }
 
-        .master-area {
+        .master-panel {
             padding: 15px 20px calc(env(safe-area-inset-bottom) + 10px);
-            background: #0a0d12; border-radius: 25px 25px 0 0;
+            background: #0d1117; border-radius: 28px 28px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
         }
         
-        .input-group {
-            position: relative; display: flex; gap: 8px; align-items: center;
+        .input-box {
+            display: flex; gap: 10px; background: rgba(255,255,255,0.05);
+            padding: 6px; border-radius: 18px; border: 1px solid rgba(0, 242, 255, 0.2);
         }
         
         input {
-            background: rgba(255,255,255,0.05) !important;
-            border: 1px solid rgba(0, 242, 255, 0.3) !important;
-            flex: 1; padding: 14px 18px; border-radius: 16px;
-            outline: none; color: #fff !important; font-size: 15px;
+            flex: 1; background: transparent !important; border: none !important;
+            padding: 10px 12px; outline: none; color: #fff !important; font-size: 14px;
             font-family: 'JetBrains Mono', monospace;
         }
         
-        .master-btn {
-            background: var(--neon); color: #000; padding: 14px 20px;
-            border-radius: 16px; font-weight: 900; font-size: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
+        .btn-send {
+            background: var(--neon); color: #000; padding: 10px 18px;
+            border-radius: 14px; font-weight: 900; font-size: 10px;
+            text-transform: uppercase;
         }
 
         .dl-btn {
             position: absolute; top: 12px; left: 12px; z-index: 50;
-            background: rgba(0,0,0,0.4); border-radius: 8px; padding: 8px;
+            background: rgba(0,0,0,0.5); border-radius: 10px; padding: 8px;
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px);
         }
 
-        #splash {
+        #intro {
             position: fixed; inset: 0; background: #05070a;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 2000;
+            z-index: 2000; transition: opacity 0.5s;
         }
     </style>
 </head>
-<body onclick="kickstart()">
+<body onclick="startStream()">
 
-    <div id="splash">
-        <div class="sync text-cyan-400 text-4xl mb-2 italic">HIT VISUAL</div>
-        <div class="text-[8px] mono text-white/20 tracking-[6px] mb-10">BY AI MASTER SYSTEM</div>
-        <div class="px-12 py-4 bg-cyan-400 text-black sync text-[11px] rounded-2xl animate-bounce">В ЭФИР</div>
+    <div id="intro">
+        <div class="sync text-cyan-400 text-4xl mb-2 italic tracking-tighter">HIT VISUAL</div>
+        <div class="text-[8px] mono text-white/20 tracking-[6px] mb-12 uppercase">Neural Turbo Engine v6</div>
+        <button class="px-14 py-5 bg-cyan-400 text-black sync text-[11px] rounded-2xl animate-pulse">ВХОД В ЭФИР</button>
     </div>
 
-    <div class="pt-8 pb-2 px-6 flex justify-between items-end">
-        <div class="sync text-[11px] text-cyan-400">LIVE BROADCAST</div>
-        <div id="mini-viz" class="flex gap-1 items-end h-3"></div>
+    <div class="pt-10 pb-2 px-6 flex justify-between items-center">
+        <div>
+            <div class="text-[11px] sync text-white tracking-wider flex items-center gap-2">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> LIVE BROADCAST
+            </div>
+            <div id="status-line" class="text-[8px] mono text-white/30 mt-1 uppercase tracking-widest">System: Standby</div>
+        </div>
+        <div id="top-viz" class="flex gap-1 items-end h-3"></div>
     </div>
 
     <div class="viewport">
-        <div id="gen-progress"></div>
-        <button class="dl-btn" onclick="saveArt(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <div class="progress-line" id="p-bar"></div>
+        <button class="dl-btn" onclick="downloadImg(event)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         </button>
         
+        <div id="placeholder"></div>
         <img id="main-img" src="">
         
         <div class="host-cam">
-            <div id="viz" class="flex items-end h-[25px]"></div>
+            <div class="text-[5px] font-bold text-cyan-400 mb-2">AI ENGINE</div>
+            <div id="viz" class="flex items-end h-[24px]"></div>
         </div>
     </div>
 
-    <div class="master-area">
-        <div id="ai-log" class="text-[10px] mono text-white/50 mb-3 overflow-hidden whitespace-nowrap">
-            > SYSTEM: STANDBY
+    <div class="master-panel">
+        <div id="ai-text" class="text-[10px] leading-relaxed text-white/60 italic mb-4 min-h-[30px] border-l-2 border-cyan-500/30 pl-3 uppercase tracking-tight">
+            Ожидание запуска студии...
         </div>
-        <div class="input-group">
-            <input type="text" id="m-prompt" placeholder="Твой промпт для нейросети...">
-            <button onclick="masterLaunch()" class="master-btn sync">ПУСК</button>
+        <div class="input-box">
+            <input type="text" id="m-input" placeholder="Твой промпт здесь...">
+            <button onclick="masterTrigger()" class="btn-send sync">ПУСК</button>
         </div>
     </div>
 
-    <audio id="stream" loop src="https://stream.nightride.fm/chillsynth.mp3"></audio>
+    <audio id="radio" loop src="https://stream.nightride.fm/chillsynth.mp3"></audio>
 
 <script>
-    const vh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    window.addEventListener('resize', vh); vh();
+    const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    window.addEventListener('resize', setVh); setVh();
     vkBridge.send("VKWebAppInit");
 
-    let isSpeaking = false, started = false, autoTimer;
-    const radio = document.getElementById('stream');
+    let isSpeaking = false, started = false, genInProgress = false, autoTimer;
+    const radio = document.getElementById('radio');
     const mainImg = document.getElementById('main-img');
-    const log = document.getElementById('ai-log');
-    const progressBar = document.getElementById('gen-progress');
+    const aiText = document.getElementById('ai-text');
+    const pBar = document.getElementById('p-bar');
 
-    function bars(id, n) {
+    function createBars(id, n) {
         const c = document.getElementById(id);
         for(let i=0; i<n; i++) {
             const b = document.createElement('div'); b.className = 'v-bar'; c.appendChild(b);
         }
     }
-    bars('viz', 5); bars('mini-viz', 4);
+    createBars('viz', 6); createBars('top-viz', 4);
 
     setInterval(() => {
         const b = document.getElementsByClassName('v-bar');
-        for(let x of b) x.style.height = (isSpeaking ? Math.random()*25 + 4 : 2) + 'px';
+        for(let x of b) x.style.height = (isSpeaking ? Math.random()*24 + 4 : 2) + 'px';
     }, 100);
 
-    function kickstart() {
+    function startStream() {
         if(started) return;
         started = true;
-        document.getElementById('splash').style.display = 'none';
-        radio.volume = 0.4; radio.play();
+        document.getElementById('intro').style.opacity = '0';
+        setTimeout(() => document.getElementById('intro').style.display = 'none', 500);
+        
+        radio.volume = 0.4; radio.play().catch(() => {});
+        document.getElementById('status-line').innerText = "System: Connected / 512px-Turbo";
+        
+        // Разблокировка TTS
         if(window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-        log.innerText = "> SYSTEM: CONNECTED";
-        autoNext();
+        
+        nextSlide();
     }
 
-    function aiSay(t) {
+    function speak(text) {
+        aiText.innerText = text;
         if (!window.speechSynthesis) return;
+        
         window.speechSynthesis.cancel();
-        const m = new SpeechSynthesisUtterance(t);
-        m.lang = 'ru-RU';
+        const m = new SpeechSynthesisUtterance(text);
+        m.lang = 'ru-RU'; m.rate = 1.1;
+        
         m.onstart = () => { isSpeaking = true; radio.volume = 0.05; };
         m.onend = () => { isSpeaking = false; radio.volume = 0.4; };
+        m.onerror = () => { isSpeaking = false; radio.volume = 0.4; };
+        
         window.speechSynthesis.speak(m);
     }
 
-    async function loadImage(prompt, isMaster = false) {
+    async function loadArt(prompt, isMaster = false) {
+        if(genInProgress && !isMaster) return; 
+        genInProgress = true;
+        
         clearTimeout(autoTimer);
-        log.innerText = isMaster ? "> MASTER: GENERATING..." : "> AI: UPDATING VISUAL...";
-        progressBar.style.width = "30%";
+        pBar.style.width = "20%";
         
-        // Используем ускоренные параметры
-        const seed = Math.floor(Math.random() * 1000000);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=768&height=1024&nologo=true`;
+        // ✅ Ультра-скорость: 512x640 + Turbo Flux
+        const seed = Math.floor(Math.random() * 999999);
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + " hit visual art style")}?seed=${seed}&width=512&height=640&nologo=true&model=flux`;
         
-        const loader = new Image();
-        loader.src = url;
+        const timeout = setTimeout(() => {
+            if(genInProgress) {
+                genInProgress = false;
+                nextSlide();
+            }
+        }, 15000); // 15 сек таймаут
+
+        mainImg.style.opacity = "0.3";
+        pBar.style.width = "60%";
         
-        progressBar.style.width = "60%";
-        
-        loader.onload = () => {
-            progressBar.style.width = "100%";
-            mainImg.style.opacity = 0;
+        mainImg.onload = () => {
+            clearTimeout(timeout);
+            pBar.style.width = "100%";
             setTimeout(() => {
-                mainImg.src = url;
-                mainImg.style.opacity = 1;
-                progressBar.style.width = "0%";
+                mainImg.style.opacity = "1";
+                pBar.style.width = "0%";
+                genInProgress = false;
                 
-                const phrase = isMaster ? "Ваш запрос обработан мастером." : "Новый поток визуализации запущен.";
-                log.innerText = "> " + (isMaster ? "MASTER" : "AI") + ": SUCCESS";
-                aiSay(phrase);
+                const phrase = isMaster ? "Мастер-генерация завершена. Оцени результат." : "Обновляю эфирную сетку. Новый визуальный ряд.";
+                speak(phrase);
                 
-                autoTimer = setTimeout(autoNext, 15000);
-            }, 300);
+                autoTimer = setTimeout(nextSlide, 15000);
+            }, 200);
         };
         
-        loader.onerror = () => {
-            log.innerText = "> ERROR: RETRYING...";
-            autoNext();
+        mainImg.onerror = () => {
+            clearTimeout(timeout);
+            genInProgress = false;
+            nextSlide();
         };
+
+        mainImg.src = url; // ✅ Загружаем напрямую
     }
 
-    function autoNext() {
-        const t = ["cyberpunk neon", "future retro", "digital luxury", "space wave"][Math.floor(Math.random()*4)];
-        loadImage(t + " hit visual art 4k");
+    function nextSlide() {
+        const topics = ["cyber neon", "future retro", "luxury digital", "neon portrait"];
+        loadArt(topics[Math.floor(Math.random()*topics.length)]);
     }
 
-    function masterLaunch() {
-        const p = document.getElementById('m-prompt').value;
-        if(!p) return;
-        vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
-        aiSay("Запускаю мастер-генерацию.");
-        loadImage(p + " high quality hit visual masterpiece", true);
+    function masterTrigger() {
+        const val = document.getElementById('m-input').value;
+        if(!val) return;
+        vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
+        speak("Принято. Переключаю мощности на ваш запрос.");
+        loadArt(val, true);
     }
 
-    function saveArt(e) {
+    function downloadImg(e) {
         e.stopPropagation();
-        window.open(mainImg.src, '_blank');
+        if(mainImg.src) window.open(mainImg.src, '_blank');
     }
 </script>
 </body>
