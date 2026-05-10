@@ -1,226 +1,394 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HIT VISUAL | TURBO v7</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <title>HIT VISUAL LUXURY</title>
+    
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=JetBrains+Mono&display=swap');
-        :root { --neon: #00f2ff; --bg: #05070a; --vh: 1vh; }
-        html, body {
-            height: 100vh; height: calc(var(--vh, 1vh) * 100);
-            margin: 0; padding: 0; background: var(--bg);
-            overflow: hidden; display: flex; flex-direction: column;
-            color: #fff; font-family: 'Unbounded', sans-serif;
-        }
-        .sync { font-family: 'Unbounded', sans-serif; font-weight: 900; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-
-        .viewport {
-            flex: 1; margin: 10px; background: #000; border-radius: 24px;
-            position: relative; overflow: hidden; border: 1px solid rgba(0, 242, 255, 0.2);
-            display: flex; align-items: center; justify-content: center;
-        }
-        #main-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s ease; opacity: 1; z-index: 10; }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Montserrat:wght@400;600;700&display=swap');
         
-        .loader-bar {
-            position: absolute; top: 0; left: 0; height: 3px; width: 0%;
-            background: var(--neon); box-shadow: 0 0 10px var(--neon);
-            transition: width 0.3s; z-index: 100;
+        :root {
+            --neon: #00e5ff;
+            --pink: #ff007b;
+            --bg: #ffffff;
+            --text: #0f172a;
+            --card: rgba(255, 255, 255, 0.98);
         }
 
-        .host-cam {
-            position: absolute; bottom: 12px; right: 12px; width: 65px; height: 85px;
-            background: rgba(0,0,0,0.85); border: 1.5px solid var(--neon);
-            border-radius: 12px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 30;
+        body.dark {
+            --bg: #0f172a;
+            --text: #f8fafc;
+            --card: rgba(15, 23, 42, 0.98);
         }
-        .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; margin: 0 1px; }
 
-        .control-panel {
-            padding: 15px 20px calc(env(safe-area-inset-bottom) + 10px);
-            background: #0d1117; border-radius: 25px 25px 0 0;
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-        input {
-            background: rgba(255,255,255,0.05) !important;
-            border: 1px solid rgba(0, 242, 255, 0.3) !important;
-            width: 100%; padding: 12px 15px; border-radius: 14px;
-            outline: none; color: #fff !important; font-size: 16px !important;
-            font-family: 'JetBrains Mono', monospace;
+
+        .sync { font-family: 'Syncopate', sans-serif; }
+
+        .glow-title {
+            font-size: 10px;
+            letter-spacing: 0.5em;
+            background: linear-gradient(90deg, var(--neon), var(--pink), #7000ff, var(--neon));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 4s linear infinite;
         }
-        .btn-action {
-            background: var(--neon); color: #000; padding: 12px 18px;
-            border-radius: 14px; font-weight: 900; font-size: 10px;
+        @keyframes rainbow { to { background-position: 200% center; } }
+
+        .art-viewport {
+            flex: 1;
+            margin: 12px;
+            background: #000;
+            border-radius: 28px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.05);
+        }
+
+        #main-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: none;
+            cursor: pointer;
+        }
+
+        .art-viewport.fs {
+            position: fixed; inset: 0; margin: 0; z-index: 100; border-radius: 0;
+        }
+        .art-viewport.fs #main-img { object-fit: contain; }
+
+        .ui-panel {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
+            border-radius: 32px 32px 0 0;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            z-index: 50;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        body.dark .chip { background: rgba(255,255,255,0.1); }
+        .chip.active { background: var(--text); color: var(--bg); }
+
+        .btn {
+            width: 100%; padding: 16px; border-radius: 18px;
+            font-family: 'Syncopate', sans-serif; font-size: 10px;
+            font-weight: 700; transition: 0.3s;
             text-transform: uppercase;
         }
-        #splash {
-            position: fixed; inset: 0; background: #05070a;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1000;
+        .btn-primary { background: var(--text); color: var(--bg); }
+        
+        .history-scroll {
+            display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px;
+            scrollbar-width: none;
         }
+        .history-scroll::-webkit-scrollbar { display: none; }
+        .history-thumb {
+            width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0;
+            object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        input { font-size: 16px !important; }
     </style>
 </head>
-<body onclick="startApp()">
+<body class="dark">
 
-    <div id="splash">
-        <div class="sync text-cyan-400 text-3xl mb-2 italic">HIT VISUAL</div>
-        <div class="text-[8px] mono text-white/30 tracking-[4px] mb-8 uppercase">Turbo Stream Engine v7</div>
-        <button class="px-12 py-4 bg-cyan-400 text-black sync text-[11px] rounded-2xl animate-pulse">ВОЙТИ В ЭФИР</button>
-    </div>
-
-    <div class="pt-8 pb-2 px-6 flex justify-between items-center">
-        <div class="text-[11px] sync text-white flex items-center gap-2">
-            <span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> LIVE
-        </div>
-        <div id="top-viz" class="flex gap-1 items-end h-3"></div>
-    </div>
-
-    <div class="viewport">
-        <div id="p-bar" class="loader-bar"></div>
-        <img id="main-img" src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop">
-        
-        <div class="host-cam">
-            <div id="viz" class="flex items-end h-[22px]"></div>
+    <!-- Рекламное окно -->
+    <div id="ad-modal" class="modal-overlay">
+        <div class="bg-white dark:bg-slate-900 rounded-[35px] p-8 max-w-sm w-full text-center">
+            <div class="text-6xl mb-6">🎬</div>
+            <h3 class="sync text-[11px] mb-4 tracking-tighter">ЛИМИТ ИСЧЕРПАН</h3>
+            <p class="text-xs opacity-60 mb-8 px-4">Для разблокировки новой генерации посмотрите рекламу (15 сек)</p>
+            <button id="ad-watch-btn" class="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-30">
+                СМОТРЕТЬ (15 СЕК)
+            </button>
+            <div id="ad-timer-text" class="mt-4 text-[9px] opacity-40 font-bold uppercase tracking-widest hidden">
+                ОСТАЛОСЬ <span id="ad-sec">15</span> СЕК
+            </div>
         </div>
     </div>
 
-    <div class="control-panel">
-        <div id="chat-box" class="text-[10px] mono text-cyan-400/70 mb-3 h-4 overflow-hidden italic uppercase">
-            > SYSTEM: STANDBY...
-        </div>
-        <div class="flex gap-2">
-            <input type="text" id="m-prompt" placeholder="Опиши свой арт...">
-            <button onclick="masterAction()" class="btn-action sync">ПУСК</button>
+    <!-- Политика конфиденциальности -->
+    <div id="privacy-modal" class="modal-overlay">
+        <div class="bg-white dark:bg-slate-900 rounded-[30px] p-8 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <h3 class="sync text-[12px] mb-6">PRIVACY POLICY</h3>
+            <div class="text-[11px] opacity-70 space-y-4 leading-relaxed">
+                <p>Приложение "HIT VISUAL LUXURY" не собирает персональные данные.</p>
+                <p>Генерация происходит через открытый API Pollinations.ai.</p>
+                <p>Мы используем localStorage для истории и лимитов.</p>
+            </div>
+            <button onclick="document.getElementById('privacy-modal').style.display='none'" class="btn btn-primary mt-8">ПОНЯТНО</button>
         </div>
     </div>
 
-    <audio id="bg-audio" loop src="https://stream.nightride.fm/chillsynth.mp3"></audio>
+    <div class="pt-10 pb-2 px-6 flex justify-between items-center">
+        <div class="glow-title sync uppercase">HIT VISUAL LUXURY</div>
+        <button onclick="toggleTheme()" id="theme-btn" class="text-xl">☀️</button>
+    </div>
 
-<script>
-    const vh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    window.addEventListener('resize', vh); vh();
-    vkBridge.send("VKWebAppInit");
+    <div class="art-viewport" id="viewport">
+        <div id="loader" class="hidden flex-col items-center">
+            <div class="w-10 h-10 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
+            <div class="mt-4 text-[7px] tracking-[4px] text-white/40 font-bold sync">RENDERING...</div>
+        </div>
+        <div id="idle" class="sync opacity-20 text-[9px] tracking-widest text-white text-center px-10">ОПИШИТЕ ИДЕЮ</div>
+        <img id="main-img" src="" alt="AI Art" onclick="toggleFS()">
+    </div>
 
-    let started = false, isSpeaking = false, genCount = 0, isGenerating = false, autoTimer;
-    const audio = document.getElementById('bg-audio');
-    const mainImg = document.getElementById('main-img');
-    const chat = document.getElementById('chat-box');
-    const pBar = document.getElementById('p-bar');
+    <div class="ui-panel">
+        <div class="flex justify-between items-center mb-4">
+            <div id="limit-badge" class="chip !py-1 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">✨ 4 БЕСПЛАТНО</div>
+            <button onclick="document.getElementById('privacy-modal').style.display='flex'" class="text-[8px] opacity-30 sync uppercase tracking-tighter">Privacy</button>
+        </div>
 
-    function makeBars(id, n) {
-        const c = document.getElementById(id);
-        for(let i=0; i<n; i++) {
-            const b = document.createElement('div'); b.className = 'v-bar'; c.appendChild(b);
-        }
-    }
-    makeBars('viz', 5); makeBars('top-viz', 4);
+        <div class="flex gap-2 overflow-x-auto mb-4 no-scrollbar">
+            <button onclick="setPrompt('cyber')" class="chip">🌃 КИБЕРПАНК</button>
+            <button onclick="setPrompt('fantasy')" class="chip">🐉 ФЭНТЕЗИ</button>
+            <button onclick="setPrompt('photo')" class="chip">📸 ПОРТРЕТ</button>
+            <button onclick="setPrompt('anime')" class="chip">🌸 АНИМЕ</button>
+        </div>
 
-    setInterval(() => {
-        const bars = document.getElementsByClassName('v-bar');
-        for(let b of bars) b.style.height = (isSpeaking ? Math.random()*22 + 4 : 2) + 'px';
-    }, 100);
+        <div class="space-y-3 mb-4">
+            <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/10 dark:border-white/10">
+                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px]" placeholder="Ваша фантазия...">
+            </div>
+        </div>
 
-    function startApp() {
-        if(started) return;
-        started = true;
-        document.getElementById('splash').style.display = 'none';
-        audio.volume = 0.3; audio.play().catch(()=>{});
-        if(window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-        chat.innerText = "> SYSTEM: ONLINE / TURBO 512";
-        nextSlide();
-    }
+        <div class="flex gap-2 mb-4">
+            <button onclick="setRatio('1:1', this)" class="chip ratio-btn active">1:1</button>
+            <button onclick="setRatio('9:16', this)" class="chip ratio-btn">9:16</button>
+            <button onclick="setRatio('16:9', this)" class="chip ratio-btn">16:9</button>
+        </div>
 
-    function aiTalk(txt) {
-        chat.innerText = "> AI: " + txt.toUpperCase();
-        if(!window.speechSynthesis) return;
-        
-        window.speechSynthesis.cancel();
-        const m = new SpeechSynthesisUtterance(txt);
-        m.lang = 'ru-RU';
-        
-        let speechCheck = false;
-        const fallback = setTimeout(() => {
-            if(!speechCheck) chat.innerText = "> 📝 " + txt.toUpperCase();
-        }, 1500);
+        <div class="history-scroll" id="history-box"></div>
 
-        m.onstart = () => { 
-            speechCheck = true; 
-            clearTimeout(fallback);
-            isSpeaking = true; 
-            audio.volume = 0.05; 
-        };
-        m.onend = () => { isSpeaking = false; audio.volume = 0.3; };
-        m.onerror = () => { 
-            isSpeaking = false; 
-            audio.volume = 0.3; 
-            chat.innerText = "> 📝 " + txt.toUpperCase();
-        };
-        window.speechSynthesis.speak(m);
-    }
+        <div class="grid grid-cols-2 gap-3">
+            <button id="gen-btn" onclick="handleGenerate()" class="btn btn-primary">СОЗДАТЬ</button>
+            <button id="save-btn" onclick="downloadArt()" class="btn border border-black/10 dark:border-white/10 hidden">СКАЧАТЬ</button>
+        </div>
+    </div>
 
-    async function loadPhoto(prompt, isUser = false) {
-        if(isGenerating && !isUser) return;
-        isGenerating = true;
-        
-        clearTimeout(autoTimer);
-        pBar.style.width = "20%";
-        
-        const seed = Math.floor(Math.random() * 999999);
-        const suffix = isUser ? "" : " 4k cinematic neon cyberpunk art";
-        // ✅ Ультра-скорость: model=turbo + enhance=false + 512x512
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + suffix)}?seed=${seed}&width=512&height=512&nologo=true&model=turbo&enhance=false`;
-        
-        const imgTimeout = setTimeout(() => {
-            if(isGenerating) {
-                isGenerating = false;
-                chat.innerText = "> AI: TIMEOUT / RETRYING...";
-                nextSlide();
+    <script>
+        vkBridge.send("VKWebAppInit");
+
+        // --- ЛИМИТЫ ---
+        const DAILY_LIMIT = 4;
+        let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
+        let lastDate = localStorage.getItem('hit_gen_date') || '';
+        let adCallback = null;
+
+        function checkLimits() {
+            const today = new Date().toDateString();
+            if(lastDate !== today) {
+                genCount = 0;
+                lastDate = today;
+                localStorage.setItem('hit_gen_count', '0');
+                localStorage.setItem('hit_gen_date', today);
             }
-        }, 15000); // 15 сек предел ожидания
+            updateBadge();
+        }
 
-        pBar.style.width = "60%";
-        const temp = new Image();
-        temp.src = url;
-        
-        temp.onload = () => {
-            clearTimeout(imgTimeout);
-            pBar.style.width = "100%";
-            mainImg.style.opacity = 0;
+        function updateBadge() {
+            const rem = Math.max(0, DAILY_LIMIT - genCount);
+            document.getElementById('limit-badge').innerText = rem > 0 ? `✨ ${rem} БЕСПЛАТНО` : `🎬 ПОСЛЕ РЕКЛАМЫ`;
+        }
+
+        function showAd(callback) {
+            adCallback = callback;
+            const modal = document.getElementById('ad-modal');
+            const btn = document.getElementById('ad-watch-btn');
+            const timerText = document.getElementById('ad-timer-text');
+            const sec = document.getElementById('ad-sec');
             
-            setTimeout(() => {
-                mainImg.src = url;
-                mainImg.style.opacity = 1;
-                pBar.style.width = "0%";
-                isGenerating = false;
+            modal.style.display = 'flex';
+            btn.disabled = true;
+            btn.innerText = "СМОТРЕТЬ (15 СЕК)";
+            timerText.classList.remove('hidden');
+            
+            let time = 15;
+            sec.innerText = time;
+            const itv = setInterval(() => {
+                time--;
+                sec.innerText = time;
+                if(time <= 0) {
+                    clearInterval(itv);
+                    btn.disabled = false;
+                    btn.innerText = "ГОТОВО ✨";
+                    btn.onclick = () => {
+                        modal.style.display = 'none';
+                        if(adCallback) adCallback(true);
+                        adCallback = null;
+                    };
+                }
+            }, 1000);
+        }
+
+        // --- ГЕНЕРАЦИЯ ---
+        const img = document.getElementById('main-img');
+        const promptIn = document.getElementById('prompt-in');
+        const historyBox = document.getElementById('history-box');
+        const viewport = document.getElementById('viewport');
+        const genBtn = document.getElementById('gen-btn');
+        let history = JSON.parse(localStorage.getItem('hit_history')) || [];
+        let curW = 1024, curH = 1024;
+        let activeTimeout = null;
+
+        async function handleGenerate() {
+            checkLimits();
+            if(!promptIn.value) return;
+
+            if(genCount >= DAILY_LIMIT) {
+                showAd((ok) => { if(ok) runGen(); });
+            } else {
+                runGen();
+            }
+        }
+
+        async function runGen() {
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('idle').classList.add('hidden');
+            img.style.display = 'none';
+            genBtn.disabled = true;
+            genBtn.innerText = "ПРОЦЕСС...";
+
+            const seed = Math.floor(Math.random()*999999);
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptIn.value)}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=flux`;
+
+            const t = new Image();
+            t.crossOrigin = "anonymous";
+            
+            activeTimeout = setTimeout(() => {
+                alert("Ошибка сети или долгий ответ. Попробуйте еще раз.");
+                resetUI();
+            }, 40000);
+
+            t.onload = () => {
+                clearTimeout(activeTimeout);
+                img.src = url;
+                img.style.display = 'block';
+                resetUI();
+                document.getElementById('save-btn').classList.remove('hidden');
                 
-                aiTalk(isUser ? "Ваш мастер-арт готов." : "Смена эфирного кадра завершена.");
-                autoTimer = setTimeout(nextSlide, 15000);
-            }, 300);
-        };
-        
-        temp.onerror = () => {
-            clearTimeout(imgTimeout);
-            isGenerating = false;
-            pBar.style.width = "0%";
-            nextSlide();
-        };
-    }
+                if(!history.includes(url)) {
+                    history.unshift(url);
+                    if(history.length > 8) history.pop();
+                    localStorage.setItem('hit_history', JSON.stringify(history));
+                    renderHistory();
+                }
 
-    function nextSlide() {
-        const t = ["cyberpunk aesthetics", "future synthwave", "neon digital city", "luxury android"][genCount % 4];
-        genCount++;
-        loadPhoto(t);
-    }
+                genCount++;
+                localStorage.setItem('hit_gen_count', genCount);
+                updateBadge();
+                vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
+            };
 
-    function masterAction() {
-        const val = document.getElementById('m-prompt').value;
-        if(!val) return;
-        vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-        aiTalk("Перехват управления...");
-        loadPhoto(val, true);
-    }
-</script>
+            t.onerror = () => {
+                clearTimeout(activeTimeout);
+                alert("Ошибка загрузки. Попробуйте другой запрос.");
+                resetUI();
+            };
+
+            t.src = url;
+        }
+
+        function resetUI() {
+            document.getElementById('loader').classList.add('hidden');
+            genBtn.disabled = false;
+            genBtn.innerText = "СОЗДАТЬ";
+        }
+
+        // --- ДОП ФУНКЦИИ ---
+        function setPrompt(t) {
+            const ps = {
+                cyber: "cyberpunk city, neon, futuristic 8k",
+                fantasy: "magic world, dragon, ethereal landscape",
+                photo: "professional portrait, studio lighting, hyperrealism",
+                anime: "high quality anime style, vibrant colors"
+            };
+            promptIn.value = ps[t];
+            promptIn.focus();
+        }
+
+        function setRatio(r, btn) {
+            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(r === '1:1') { curW=1024; curH=1024; viewport.style.aspectRatio = "1/1"; }
+            if(r === '9:16') { curW=768; curH=1344; viewport.style.aspectRatio = "9/16"; }
+            if(r === '16:9') { curW=1216; curH=688; viewport.style.aspectRatio = "16/9"; }
+        }
+
+        function renderHistory() {
+            historyBox.innerHTML = history.map(u => `
+                <img src="${u}" data-src="${u}" class="history-thumb" onclick="loadFromHistory(this)">
+            `).join('');
+        }
+
+        function loadFromHistory(el) {
+            img.src = el.dataset.src;
+            img.style.display = 'block';
+            document.getElementById('idle').classList.add('hidden');
+            document.getElementById('save-btn').classList.remove('hidden');
+            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isD = document.body.classList.contains('dark');
+            document.getElementById('theme-btn').innerText = isD ? '☀️' : '🌙';
+            localStorage.setItem('theme', isD ? 'dark' : 'light');
+        }
+
+        function toggleFS() { if(img.src) viewport.classList.toggle('fs'); }
+
+        async function downloadArt() {
+            if(img.src) vkBridge.send("VKWebAppShowImages", { images: [img.src] });
+        }
+
+        window.onload = () => {
+            checkLimits();
+            renderHistory();
+            if(localStorage.getItem('theme') === 'light') toggleTheme();
+        };
+    </script>
 </body>
 </html>
+
+
+
