@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HIT VISUAL | TURBO LIVE</title>
+    <title>HIT VISUAL | TURBO v7</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -33,7 +33,7 @@
 
         .host-cam {
             position: absolute; bottom: 12px; right: 12px; width: 65px; height: 85px;
-            background: rgba(0,0,0,0.8); border: 1.5px solid var(--neon);
+            background: rgba(0,0,0,0.85); border: 1.5px solid var(--neon);
             border-radius: 12px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 30;
         }
@@ -47,7 +47,7 @@
             background: rgba(255,255,255,0.05) !important;
             border: 1px solid rgba(0, 242, 255, 0.3) !important;
             width: 100%; padding: 12px 15px; border-radius: 14px;
-            outline: none; color: #fff !important; font-size: 14px;
+            outline: none; color: #fff !important; font-size: 16px !important;
             font-family: 'JetBrains Mono', monospace;
         }
         .btn-action {
@@ -66,20 +66,19 @@
 
     <div id="splash">
         <div class="sync text-cyan-400 text-3xl mb-2 italic">HIT VISUAL</div>
-        <div class="text-[8px] mono text-white/30 tracking-[4px] mb-8 uppercase">Neural Radio Stream</div>
-        <button class="px-12 py-4 bg-cyan-400 text-black sync text-[11px] rounded-2xl animate-pulse">В ЭФИР</button>
+        <div class="text-[8px] mono text-white/30 tracking-[4px] mb-8 uppercase">Turbo Stream Engine v7</div>
+        <button class="px-12 py-4 bg-cyan-400 text-black sync text-[11px] rounded-2xl animate-pulse">ВОЙТИ В ЭФИР</button>
     </div>
 
     <div class="pt-8 pb-2 px-6 flex justify-between items-center">
         <div class="text-[11px] sync text-white flex items-center gap-2">
-            <span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> BROADCASTING
+            <span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span> LIVE
         </div>
         <div id="top-viz" class="flex gap-1 items-end h-3"></div>
     </div>
 
     <div class="viewport">
         <div id="p-bar" class="loader-bar"></div>
-        <!-- Стартовая картинка чтобы не было черного экрана -->
         <img id="main-img" src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop">
         
         <div class="host-cam">
@@ -104,7 +103,7 @@
     window.addEventListener('resize', vh); vh();
     vkBridge.send("VKWebAppInit");
 
-    let started = false, isSpeaking = false, genCount = 0;
+    let started = false, isSpeaking = false, genCount = 0, isGenerating = false, autoTimer;
     const audio = document.getElementById('bg-audio');
     const mainImg = document.getElementById('main-img');
     const chat = document.getElementById('chat-box');
@@ -129,54 +128,88 @@
         document.getElementById('splash').style.display = 'none';
         audio.volume = 0.3; audio.play().catch(()=>{});
         if(window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-        chat.innerText = "> SYSTEM: ONLINE / TURBO ENGINE";
-        
-        // Сразу запускаем первый цикл
-        setTimeout(nextSlide, 1000);
+        chat.innerText = "> SYSTEM: ONLINE / TURBO 512";
+        nextSlide();
     }
 
     function aiTalk(txt) {
         chat.innerText = "> AI: " + txt.toUpperCase();
         if(!window.speechSynthesis) return;
+        
         window.speechSynthesis.cancel();
         const m = new SpeechSynthesisUtterance(txt);
         m.lang = 'ru-RU';
-        m.onstart = () => { isSpeaking = true; audio.volume = 0.05; };
+        
+        let speechCheck = false;
+        const fallback = setTimeout(() => {
+            if(!speechCheck) chat.innerText = "> 📝 " + txt.toUpperCase();
+        }, 1500);
+
+        m.onstart = () => { 
+            speechCheck = true; 
+            clearTimeout(fallback);
+            isSpeaking = true; 
+            audio.volume = 0.05; 
+        };
         m.onend = () => { isSpeaking = false; audio.volume = 0.3; };
+        m.onerror = () => { 
+            isSpeaking = false; 
+            audio.volume = 0.3; 
+            chat.innerText = "> 📝 " + txt.toUpperCase();
+        };
         window.speechSynthesis.speak(m);
     }
 
     async function loadPhoto(prompt, isUser = false) {
-        pBar.style.width = "20%";
-        const seed = Math.floor(Math.random() * 99999);
-        // Используем TURBO модель для скорости (512x512 - летает)
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + " 4k cinematic neon art")}?seed=${seed}&width=512&height=512&nologo=true&model=turbo`;
+        if(isGenerating && !isUser) return;
+        isGenerating = true;
         
-        pBar.style.width = "50%";
+        clearTimeout(autoTimer);
+        pBar.style.width = "20%";
+        
+        const seed = Math.floor(Math.random() * 999999);
+        const suffix = isUser ? "" : " 4k cinematic neon cyberpunk art";
+        // ✅ Ультра-скорость: model=turbo + enhance=false + 512x512
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + suffix)}?seed=${seed}&width=512&height=512&nologo=true&model=turbo&enhance=false`;
+        
+        const imgTimeout = setTimeout(() => {
+            if(isGenerating) {
+                isGenerating = false;
+                chat.innerText = "> AI: TIMEOUT / RETRYING...";
+                nextSlide();
+            }
+        }, 15000); // 15 сек предел ожидания
+
+        pBar.style.width = "60%";
         const temp = new Image();
         temp.src = url;
         
         temp.onload = () => {
+            clearTimeout(imgTimeout);
             pBar.style.width = "100%";
             mainImg.style.opacity = 0;
+            
             setTimeout(() => {
                 mainImg.src = url;
                 mainImg.style.opacity = 1;
                 pBar.style.width = "0%";
-                aiTalk(isUser ? "Твой арт готов, мастер." : "Обновление эфира завершено.");
+                isGenerating = false;
                 
-                if(!isUser) setTimeout(nextSlide, 12000);
+                aiTalk(isUser ? "Ваш мастер-арт готов." : "Смена эфирного кадра завершена.");
+                autoTimer = setTimeout(nextSlide, 15000);
             }, 300);
         };
         
         temp.onerror = () => {
+            clearTimeout(imgTimeout);
+            isGenerating = false;
             pBar.style.width = "0%";
-            if(!isUser) nextSlide();
+            nextSlide();
         };
     }
 
     function nextSlide() {
-        const t = ["cyberpunk girl", "neon city", "retro car", "space station"][genCount % 4];
+        const t = ["cyberpunk aesthetics", "future synthwave", "neon digital city", "luxury android"][genCount % 4];
         genCount++;
         loadPhoto(t);
     }
@@ -185,7 +218,7 @@
         const val = document.getElementById('m-prompt').value;
         if(!val) return;
         vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-        aiTalk("Перехватываю поток...");
+        aiTalk("Перехват управления...");
         loadPhoto(val, true);
     }
 </script>
