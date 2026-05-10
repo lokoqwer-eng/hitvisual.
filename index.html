@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HIT VISUAL | REBORN LIVE</title>
+    <title>HIT VISUAL | SPEED MASTER</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -19,205 +19,190 @@
         .mono { font-family: 'JetBrains Mono', monospace; }
 
         .viewport {
-            flex: 1; margin: 10px; background: #000; border-radius: 24px;
-            position: relative; overflow: hidden; border: 1px solid rgba(0, 242, 255, 0.2);
-            display: flex; align-items: center; justify-content: center;
+            flex: 1; margin: 10px; background: #000; border-radius: 20px;
+            position: relative; overflow: hidden; border: 1px solid rgba(0, 242, 255, 0.15);
         }
-        #main-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s ease; opacity: 0; z-index: 10; }
-        #placeholder-bg { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: blur(10px); z-index: 1; }
+        #main-img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.5s ease, opacity 0.5s ease; opacity: 0; }
         
+        /* Индикатор прогресса генерации */
+        #gen-progress {
+            position: absolute; top: 0; left: 0; height: 3px; width: 0%;
+            background: var(--neon); box-shadow: 0 0 10px var(--neon);
+            transition: width 0.3s; z-index: 100;
+        }
+
         .host-cam {
-            position: absolute; bottom: 15px; right: 15px; width: 70px; height: 90px;
-            background: rgba(0,0,0,0.85); border: 1.5px solid var(--neon);
-            border-radius: 12px; display: flex; flex-direction: column;
+            position: absolute; bottom: 12px; right: 12px; width: 60px; height: 80px;
+            background: rgba(0,0,0,0.8); border: 1px solid var(--neon);
+            border-radius: 10px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 30;
         }
         .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; margin: 0 1px; }
 
-        .master-panel {
-            padding: 15px 20px calc(env(safe-area-inset-bottom) + 15px);
-            background: #0d1117; border-radius: 25px 25px 0 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
+        .master-area {
+            padding: 15px 20px calc(env(safe-area-inset-bottom) + 10px);
+            background: #0a0d12; border-radius: 25px 25px 0 0;
         }
+        
+        .input-group {
+            position: relative; display: flex; gap: 8px; align-items: center;
+        }
+        
         input {
             background: rgba(255,255,255,0.05) !important;
-            border: 1px solid rgba(0, 242, 255, 0.4) !important;
-            width: 100%; padding: 14px; border-radius: 14px;
+            border: 1px solid rgba(0, 242, 255, 0.3) !important;
+            flex: 1; padding: 14px 18px; border-radius: 16px;
             outline: none; color: #fff !important; font-size: 15px;
             font-family: 'JetBrains Mono', monospace;
         }
-        .btn-dl {
-            position: absolute; top: 15px; right: 15px; z-index: 50;
-            background: rgba(0,0,0,0.5); border: 1px solid #fff;
-            width: 38px; height: 38px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
+        
+        .master-btn {
+            background: var(--neon); color: #000; padding: 14px 20px;
+            border-radius: 16px; font-weight: 900; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        #loader {
+
+        .dl-btn {
+            position: absolute; top: 12px; left: 12px; z-index: 50;
+            background: rgba(0,0,0,0.4); border-radius: 8px; padding: 8px;
+        }
+
+        #splash {
             position: fixed; inset: 0; background: #05070a;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1000;
+            z-index: 2000;
         }
     </style>
 </head>
-<body onclick="startBroadcast()">
+<body onclick="kickstart()">
 
-    <div id="loader">
-        <div class="sync text-cyan-400 text-4xl mb-4 italic tracking-tighter">HIT VISUAL</div>
-        <div class="text-[9px] mono text-white/30 tracking-[6px] mb-10 uppercase">Neural Stream Studio</div>
-        <button class="px-12 py-5 bg-cyan-400 text-black sync text-[12px] rounded-2xl animate-pulse uppercase">Запустить Эфир</button>
+    <div id="splash">
+        <div class="sync text-cyan-400 text-4xl mb-2 italic">HIT VISUAL</div>
+        <div class="text-[8px] mono text-white/20 tracking-[6px] mb-10">BY AI MASTER SYSTEM</div>
+        <div class="px-12 py-4 bg-cyan-400 text-black sync text-[11px] rounded-2xl animate-bounce">В ЭФИР</div>
     </div>
 
-    <div class="pt-10 pb-2 px-6 flex justify-between items-center">
-        <div>
-            <div class="text-[13px] sync text-white flex items-center gap-2">
-                <span class="w-2 h-2 bg-red-600 rounded-full animate-ping"></span> HIT VISUAL LIVE
-            </div>
-            <div id="radio-info" class="text-[8px] mono text-white/20 mt-1 uppercase">Radio: Syncing...</div>
-        </div>
-        <div id="top-viz" class="flex items-end h-[12px] gap-[2px]"></div>
+    <div class="pt-8 pb-2 px-6 flex justify-between items-end">
+        <div class="sync text-[11px] text-cyan-400">LIVE BROADCAST</div>
+        <div id="mini-viz" class="flex gap-1 items-end h-3"></div>
     </div>
 
     <div class="viewport">
-        <button class="btn-dl" onclick="saveArt(event)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <div id="gen-progress"></div>
+        <button class="dl-btn" onclick="saveArt(event)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         </button>
         
-        <img id="placeholder-bg" src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=1000&auto=format&fit=crop">
         <img id="main-img" src="">
         
-        <div id="loading-indicator" class="absolute z-20 hidden">
-            <div class="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-
         <div class="host-cam">
-            <div class="text-[6px] font-bold text-cyan-400 mb-1 uppercase">AI Streamer</div>
-            <div id="viz" class="flex items-end h-[22px]"></div>
+            <div id="viz" class="flex items-end h-[25px]"></div>
         </div>
     </div>
 
-    <div class="master-panel">
-        <div id="ai-status" class="text-[11px] leading-relaxed text-white/70 italic mb-4 min-h-[34px] border-l-2 border-cyan-500/50 pl-3">
-            Ожидание запуска системы...
+    <div class="master-area">
+        <div id="ai-log" class="text-[10px] mono text-white/50 mb-3 overflow-hidden whitespace-nowrap">
+            > SYSTEM: STANDBY
         </div>
-
-        <div class="flex gap-2">
-            <input type="text" id="m-prompt" placeholder="Твоя идея для следующего кадра...">
-            <button onclick="forceGenerate()" class="bg-cyan-400 text-black px-6 rounded-14 font-black sync text-[10px] rounded-xl active:scale-90 transition-transform">ПУСК</button>
+        <div class="input-group">
+            <input type="text" id="m-prompt" placeholder="Твой промпт для нейросети...">
+            <button onclick="masterLaunch()" class="master-btn sync">ПУСК</button>
         </div>
     </div>
 
-    <audio id="bg-music" loop src="https://stream.nightride.fm/chillsynth.mp3"></audio>
+    <audio id="stream" loop src="https://stream.nightride.fm/chillsynth.mp3"></audio>
 
 <script>
-    const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    window.addEventListener('resize', setVh); setVh();
+    const vh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    window.addEventListener('resize', vh); vh();
     vkBridge.send("VKWebAppInit");
 
-    let isSpeaking = false, started = false, currentSeed = Math.random();
-    const radio = document.getElementById('bg-music');
+    let isSpeaking = false, started = false, autoTimer;
+    const radio = document.getElementById('stream');
     const mainImg = document.getElementById('main-img');
-    const statusText = document.getElementById('ai-status');
+    const log = document.getElementById('ai-log');
+    const progressBar = document.getElementById('gen-progress');
 
-    function createViz(id, n) {
+    function bars(id, n) {
         const c = document.getElementById(id);
         for(let i=0; i<n; i++) {
             const b = document.createElement('div'); b.className = 'v-bar'; c.appendChild(b);
         }
     }
-    createViz('viz', 6); createViz('top-viz', 4);
+    bars('viz', 5); bars('mini-viz', 4);
 
     setInterval(() => {
-        const bars = document.getElementsByClassName('v-bar');
-        for(let b of bars) b.style.height = (isSpeaking ? Math.random()*22 + 3 : 2) + 'px';
+        const b = document.getElementsByClassName('v-bar');
+        for(let x of b) x.style.height = (isSpeaking ? Math.random()*25 + 4 : 2) + 'px';
     }, 100);
 
-    function startBroadcast() {
+    function kickstart() {
         if(started) return;
         started = true;
-        document.getElementById('loader').style.opacity = '0';
-        setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-        
+        document.getElementById('splash').style.display = 'none';
         radio.volume = 0.4; radio.play();
-        document.getElementById('radio-info').innerText = "Radio: Chillsynth 88.5 FM";
-        
         if(window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-        
-        nextSlide();
+        log.innerText = "> SYSTEM: CONNECTED";
+        autoNext();
     }
 
-    function talk(text) {
+    function aiSay(t) {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
-        const m = new SpeechSynthesisUtterance(text);
-        m.lang = 'ru-RU'; m.rate = 1.0;
-        m.onstart = () => { isSpeaking = true; radio.volume = 0.1; };
+        const m = new SpeechSynthesisUtterance(t);
+        m.lang = 'ru-RU';
+        m.onstart = () => { isSpeaking = true; radio.volume = 0.05; };
         m.onend = () => { isSpeaking = false; radio.volume = 0.4; };
         window.speechSynthesis.speak(m);
     }
 
-    const livePhrases = [
-        "Обновляю визуальный поток. Как вам эта неоновая эстетика?",
-        "Этот кадр был сгенерирован специально для нашего эфира.",
-        "Продолжаем погружение в цифровой мир. Взгляните на экран.",
-        "Нейронная сеть выдала отличный результат. Идем дальше.",
-        "Вы слушаете HIT VISUAL. Бесконечный поток идей в реальном времени."
-    ];
-
-    async function nextSlide() {
-        if(!started) return;
+    async function loadImage(prompt, isMaster = false) {
+        clearTimeout(autoTimer);
+        log.innerText = isMaster ? "> MASTER: GENERATING..." : "> AI: UPDATING VISUAL...";
+        progressBar.style.width = "30%";
         
-        const concepts = ["cyberpunk luxury", "vaporwave dream", "neon futuristic car", "android girl portrait", "digital city 8k"];
-        const q = concepts[Math.floor(Math.random()*concepts.length)];
+        // Используем ускоренные параметры
+        const seed = Math.floor(Math.random() * 1000000);
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=768&height=1024&nologo=true`;
         
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(q + " high quality art hit visual style")}?seed=${Math.random()}&nologo=true&width=1024&height=1280`;
+        const loader = new Image();
+        loader.src = url;
         
-        document.getElementById('loading-indicator').classList.remove('hidden');
+        progressBar.style.width = "60%";
         
-        const img = new Image();
-        img.src = url;
-        
-        // Тайм-аут загрузки (если за 6 сек не загрузилось - пробуем еще раз)
-        const timeout = setTimeout(() => {
-            if(!img.complete) {
-                console.log("Retry loading...");
-                nextSlide();
-            }
-        }, 6000);
-
-        img.onload = () => {
-            clearTimeout(timeout);
-            document.getElementById('loading-indicator').classList.add('hidden');
-            mainImg.src = url;
-            mainImg.style.opacity = 1;
-            
-            const txt = livePhrases[Math.floor(Math.random()*livePhrases.length)];
-            statusText.innerText = txt;
-            talk(txt);
-            
-            // Ждем 12 сек и меняем
+        loader.onload = () => {
+            progressBar.style.width = "100%";
+            mainImg.style.opacity = 0;
             setTimeout(() => {
-                mainImg.style.opacity = 0.5; // Небольшое затухание перед сменой
-                nextSlide();
-            }, 12000);
+                mainImg.src = url;
+                mainImg.style.opacity = 1;
+                progressBar.style.width = "0%";
+                
+                const phrase = isMaster ? "Ваш запрос обработан мастером." : "Новый поток визуализации запущен.";
+                log.innerText = "> " + (isMaster ? "MASTER" : "AI") + ": SUCCESS";
+                aiSay(phrase);
+                
+                autoTimer = setTimeout(autoNext, 15000);
+            }, 300);
+        };
+        
+        loader.onerror = () => {
+            log.innerText = "> ERROR: RETRYING...";
+            autoNext();
         };
     }
 
-    function forceGenerate() {
-        const val = document.getElementById('m-prompt').value;
-        if(!val) return;
-        
-        talk("Принято. Мастер перехватывает управление эфиром.");
-        mainImg.style.opacity = 0.3;
-        document.getElementById('loading-indicator').classList.remove('hidden');
-        
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(val + " master quality hit visual")}?seed=${Math.random()}&nologo=true&width=1024&height=1280`;
-        mainImg.src = url;
-        mainImg.onload = () => {
-            document.getElementById('loading-indicator').classList.add('hidden');
-            mainImg.style.opacity = 1;
-            statusText.innerText = "Мастер создал новый визуальный поток: " + val;
-            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-        };
+    function autoNext() {
+        const t = ["cyberpunk neon", "future retro", "digital luxury", "space wave"][Math.floor(Math.random()*4)];
+        loadImage(t + " hit visual art 4k");
+    }
+
+    function masterLaunch() {
+        const p = document.getElementById('m-prompt').value;
+        if(!p) return;
+        vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
+        aiSay("Запускаю мастер-генерацию.");
+        loadImage(p + " high quality hit visual masterpiece", true);
     }
 
     function saveArt(e) {
