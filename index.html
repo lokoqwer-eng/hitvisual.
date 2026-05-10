@@ -4,390 +4,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
-    <title>HIT VISUAL LUXURY</title>
-    
-    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    <title>HIT VISUAL | AI PODCAST</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Montserrat:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=JetBrains+Mono&display=swap');
         
-        :root {
-            --neon: #00e5ff;
-            --pink: #ff007b;
-            --bg: #ffffff;
-            --text: #0f172a;
-            --card: rgba(255, 255, 255, 0.98);
-        }
-
-        body.dark {
-            --bg: #0f172a;
-            --text: #f8fafc;
-            --card: rgba(15, 23, 42, 0.98);
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            transition: background 0.3s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .sync { font-family: 'Syncopate', sans-serif; }
-
-        .glow-title {
-            font-size: 10px;
-            letter-spacing: 0.5em;
-            background: linear-gradient(90deg, var(--neon), var(--pink), #7000ff, var(--neon));
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: rainbow 4s linear infinite;
-        }
-        @keyframes rainbow { to { background-position: 200% center; } }
-
-        .art-viewport {
-            flex: 1;
-            margin: 12px;
-            background: #000;
-            border-radius: 28px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.05);
-        }
-
-        #main-img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: none;
-            cursor: pointer;
-        }
-
-        .art-viewport.fs {
-            position: fixed; inset: 0; margin: 0; z-index: 100; border-radius: 0;
-        }
-        .art-viewport.fs #main-img { object-fit: contain; }
-
-        .ui-panel {
-            background: var(--card);
-            backdrop-filter: blur(20px);
-            padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
-            border-radius: 32px 32px 0 0;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-            z-index: 50;
-        }
-
-        .chip {
-            padding: 8px 14px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            white-space: nowrap;
-            transition: 0.2s;
-        }
-        body.dark .chip { background: rgba(255,255,255,0.1); }
-        .chip.active { background: var(--text); color: var(--bg); }
-
-        .btn {
-            width: 100%; padding: 16px; border-radius: 18px;
-            font-family: 'Syncopate', sans-serif; font-size: 10px;
-            font-weight: 700; transition: 0.3s;
-            text-transform: uppercase;
-        }
-        .btn-primary { background: var(--text); color: var(--bg); }
+        body { background: #000; color: #fff; margin: 0; overflow: hidden; height: 100vh; font-family: 'Unbounded', sans-serif; }
         
-        .history-scroll {
-            display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px;
-            scrollbar-width: none;
-        }
-        .history-scroll::-webkit-scrollbar { display: none; }
-        .history-thumb {
-            width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0;
-            object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
+        .main-stage { position: absolute; inset: 0; background: #050505; display: flex; align-items: center; justify-content: center; }
+        #art-display { width: 100%; height: 100%; object-fit: cover; transition: opacity 1.2s ease-in-out; opacity: 0; }
+
+        .ui-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px; }
+
+        /* Вебка блогера-подкастера */
+        .blogger-cam {
+            position: absolute; bottom: calc(env(safe-area-inset-bottom) + 20px); right: 15px;
+            width: 90px; height: 110px; border-radius: 15px;
+            background: rgba(0,0,0,0.9); border: 1.5px solid #00f2ff;
+            overflow: hidden; pointer-events: auto;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .modal-overlay {
-            display: none;
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
-            align-items: center; justify-content: center; padding: 20px;
-            backdrop-filter: blur(10px);
-        }
+        .visualizer { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 25px; margin-top: 8px; }
+        .v-bar { width: 3px; background: #00f2ff; height: 2px; transition: height 0.1s; border-radius: 1px; }
 
-        input { font-size: 16px !important; }
+        #start-overlay {
+            position: absolute; inset: 0; z-index: 100; background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .logo-top { color: #00f2ff; font-size: 46px; font-weight: 900; line-height: 1; text-shadow: 0 0 30px rgba(0,242,255,0.7); }
+        .logo-bottom { color: #fff; font-size: 38px; font-weight: 900; line-height: 1; }
+
+        .podcast-info { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 25px); left: 15px; font-family: 'JetBrains Mono'; max-width: 240px; }
+        
+        .glitch-text { animation: pulse 2s infinite; color: #00f2ff; font-size: 9px; letter-spacing: 2px; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
-<body class="dark">
+<body>
 
-    <!-- Рекламное окно -->
-    <div id="ad-modal" class="modal-overlay">
-        <div class="bg-white dark:bg-slate-900 rounded-[35px] p-8 max-w-sm w-full text-center">
-            <div class="text-6xl mb-6">🎬</div>
-            <h3 class="sync text-[11px] mb-4 tracking-tighter">ЛИМИТ ИСЧЕРПАН</h3>
-            <p class="text-xs opacity-60 mb-8 px-4">Для разблокировки новой генерации посмотрите рекламу (15 сек)</p>
-            <button id="ad-watch-btn" class="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-30">
-                СМОТРЕТЬ (15 СЕК)
-            </button>
-            <div id="ad-timer-text" class="mt-4 text-[9px] opacity-40 font-bold uppercase tracking-widest hidden">
-                ОСТАЛОСЬ <span id="ad-sec">15</span> СЕК
-            </div>
+<div id="start-overlay" onclick="startPodcast()">
+    <div class="logo-top">HIT</div>
+    <div class="logo-bottom">VISUAL</div>
+    <div class="mt-12 px-10 py-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-[11px] uppercase tracking-[5px] hover:bg-cyan-500 hover:text-black transition-all">
+        Войти в эфир
+    </div>
+</div>
+
+<div class="main-stage">
+    <img id="art-display" src="">
+</div>
+
+<div class="ui-layer">
+    <div class="flex justify-between items-start pt-6">
+        <div class="flex flex-col gap-1">
+            <div class="bg-red-600 text-white px-3 py-0.5 rounded text-[10px] font-black italic shadow-[0_0_15px_rgba(220,38,38,0.5)]">PODCAST LIVE</div>
+            <div class="text-[8px] text-white/40 font-mono tracking-widest uppercase">Episode: AI_Revolution</div>
+        </div>
+        <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-[9px] border border-white/10 text-cyan-400">
+            STREAMS: <span id="buff-status">ONLINE</span>
         </div>
     </div>
 
-    <!-- Политика конфиденциальности -->
-    <div id="privacy-modal" class="modal-overlay">
-        <div class="bg-white dark:bg-slate-900 rounded-[30px] p-8 max-w-md w-full max-h-[80vh] overflow-y-auto">
-            <h3 class="sync text-[12px] mb-6">PRIVACY POLICY</h3>
-            <div class="text-[11px] opacity-70 space-y-4 leading-relaxed">
-                <p>Приложение "HIT VISUAL LUXURY" не собирает персональные данные.</p>
-                <p>Генерация происходит через открытый API Pollinations.ai.</p>
-                <p>Мы используем localStorage для истории и лимитов.</p>
-            </div>
-            <button onclick="document.getElementById('privacy-modal').style.display='none'" class="btn btn-primary mt-8">ПОНЯТНО</button>
+    <div class="blogger-cam">
+        <div class="text-[8px] text-cyan-400 font-bold mb-1">HOST</div>
+        <div class="bg-cyan-500/20 p-2 rounded-full">
+            <svg class="w-6 h-6 text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
         </div>
+        <div class="visualizer" id="viz"></div>
     </div>
 
-    <div class="pt-10 pb-2 px-6 flex justify-between items-center">
-        <div class="glow-title sync uppercase">HIT VISUAL LUXURY</div>
-        <button onclick="toggleTheme()" id="theme-btn" class="text-xl">☀️</button>
+    <div class="podcast-info">
+        <div class="glitch-text mb-2">> ЭФИР HIT VISUAL</div>
+        <div class="text-[10px] text-white/50 leading-relaxed italic">"Пространство, где реальность встречается с цифровым искусством. Только хиты."</div>
     </div>
+</div>
 
-    <div class="art-viewport" id="viewport">
-        <div id="loader" class="hidden flex-col items-center">
-            <div class="w-10 h-10 border-4 border-cyan-500/10 border-t-cyan-500 rounded-full animate-spin"></div>
-            <div class="mt-4 text-[7px] tracking-[4px] text-white/40 font-bold sync">RENDERING...</div>
-        </div>
-        <div id="idle" class="sync opacity-20 text-[9px] tracking-widest text-white text-center px-10">ОПИШИТЕ ИДЕЮ</div>
-        <img id="main-img" src="" alt="AI Art" onclick="toggleFS()">
-    </div>
+<script>
+const apiKey = ""; // ТВОЙ API КЛЮЧ
+let audioCtx, musicGain, speechGain, analyser, dataArray;
+const radioUrl = "https://lofi.stream.laut.fm/lofi?t302=2023-05-10_19-00-00";
 
-    <div class="ui-panel">
-        <div class="flex justify-between items-center mb-4">
-            <div id="limit-badge" class="chip !py-1 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">✨ 4 БЕСПЛАТНО</div>
-            <button onclick="document.getElementById('privacy-modal').style.display='flex'" class="text-[8px] opacity-30 sync uppercase tracking-tighter">Privacy</button>
-        </div>
+// Системная роль блогера-подкастера
+const systemPrompt = `Ты — ведущий подкаста сообщества HIT VISUAL. 
+Твоя задача: вести эфир от имени группы. Ты не просто описываешь картинки, ты рассуждаешь о философии HIT VISUAL, о гиперреализме, о том как мы создаем визуальные тренды. 
+Твой тон: харизматичный, уверенный, вдохновляющий. 
+Используй фразы: 'наше сообщество', 'визуальная революция', 'стираем грани'. 
+Каждое твое включение — это новая мысль для подкаста на 2-3 предложения.`;
 
-        <div class="flex gap-2 overflow-x-auto mb-4 no-scrollbar">
-            <button onclick="setPrompt('cyber')" class="chip">🌃 КИБЕРПАНК</button>
-            <button onclick="setPrompt('fantasy')" class="chip">🐉 ФЭНТЕЗИ</button>
-            <button onclick="setPrompt('photo')" class="chip">📸 ПОРТРЕТ</button>
-            <button onclick="setPrompt('anime')" class="chip">🌸 АНИМЕ</button>
-        </div>
+function initAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const radio = new Audio(radioUrl);
+    radio.crossOrigin = "anonymous";
+    const src = audioCtx.createMediaElementSource(radio);
+    musicGain = audioCtx.createGain();
+    speechGain = audioCtx.createGain();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 32;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        <div class="space-y-3 mb-4">
-            <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/10 dark:border-white/10">
-                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px]" placeholder="Ваша фантазия...">
-            </div>
-        </div>
+    src.connect(musicGain);
+    musicGain.connect(analyser);
+    speechGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
 
-        <div class="flex gap-2 mb-4">
-            <button onclick="setRatio('1:1', this)" class="chip ratio-btn active">1:1</button>
-            <button onclick="setRatio('9:16', this)" class="chip ratio-btn">9:16</button>
-            <button onclick="setRatio('16:9', this)" class="chip ratio-btn">16:9</button>
-        </div>
+    musicGain.gain.value = 0.25;
+    radio.play();
 
-        <div class="history-scroll" id="history-box"></div>
+    const viz = document.getElementById('viz');
+    for(let i=0; i<6; i++) {
+        const b = document.createElement('div');
+        b.className = 'v-bar';
+        viz.appendChild(b);
+    }
+    updateViz();
+}
 
-        <div class="grid grid-cols-2 gap-3">
-            <button id="gen-btn" onclick="handleGenerate()" class="btn btn-primary">СОЗДАТЬ</button>
-            <button id="save-btn" onclick="downloadArt()" class="btn border border-black/10 dark:border-white/10 hidden">СКАЧАТЬ</button>
-        </div>
-    </div>
+function updateViz() {
+    analyser.getByteFrequencyData(dataArray);
+    const bars = document.getElementsByClassName('v-bar');
+    for(let i=0; i<bars.length; i++) {
+        bars[i].style.height = `${Math.max(2, (dataArray[i]/255)*25)}px`;
+    }
+    requestAnimationFrame(updateViz);
+}
 
-    <script>
-        vkBridge.send("VKWebAppInit");
+async function callAI(type, prompt) {
+    const url = type === 'text' 
+        ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+    
+    const body = type === 'text'
+        ? { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } }
+        : { instances: { prompt }, parameters: { sampleCount: 1 } };
 
-        // --- ЛИМИТЫ ---
-        const DAILY_LIMIT = 4;
-        let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
-        let lastDate = localStorage.getItem('hit_gen_date') || '';
-        let adCallback = null;
+    const r = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+    const d = await r.json();
+    return type === 'text' ? d.candidates[0].content.parts[0].text : `data:image/png;base64,${d.predictions[0].bytesBase64Encoded}`;
+}
 
-        function checkLimits() {
-            const today = new Date().toDateString();
-            if(lastDate !== today) {
-                genCount = 0;
-                lastDate = today;
-                localStorage.setItem('hit_gen_count', '0');
-                localStorage.setItem('hit_gen_date', today);
-            }
-            updateBadge();
-        }
-
-        function updateBadge() {
-            const rem = Math.max(0, DAILY_LIMIT - genCount);
-            document.getElementById('limit-badge').innerText = rem > 0 ? `✨ ${rem} БЕСПЛАТНО` : `🎬 ПОСЛЕ РЕКЛАМЫ`;
-        }
-
-        function showAd(callback) {
-            adCallback = callback;
-            const modal = document.getElementById('ad-modal');
-            const btn = document.getElementById('ad-watch-btn');
-            const timerText = document.getElementById('ad-timer-text');
-            const sec = document.getElementById('ad-sec');
-            
-            modal.style.display = 'flex';
-            btn.disabled = true;
-            btn.innerText = "СМОТРЕТЬ (15 СЕК)";
-            timerText.classList.remove('hidden');
-            
-            let time = 15;
-            sec.innerText = time;
-            const itv = setInterval(() => {
-                time--;
-                sec.innerText = time;
-                if(time <= 0) {
-                    clearInterval(itv);
-                    btn.disabled = false;
-                    btn.innerText = "ГОТОВО ✨";
-                    btn.onclick = () => {
-                        modal.style.display = 'none';
-                        if(adCallback) adCallback(true);
-                        adCallback = null;
-                    };
+async function speak(text) {
+    musicGain.gain.setTargetAtTime(0.06, audioCtx.currentTime, 0.4);
+    try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                contents: [{ parts: [{ text }] }],
+                generationConfig: { 
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
                 }
-            }, 1000);
-        }
+            })
+        });
+        const d = await r.json();
+        const audio = new Audio(URL.createObjectURL(pcmToWav(d.candidates[0].content.parts[0].inlineData.data, 24000)));
+        const s = audioCtx.createMediaElementSource(audio);
+        s.connect(speechGain);
+        return new Promise(res => {
+            audio.onended = () => { musicGain.gain.setTargetAtTime(0.25, audioCtx.currentTime, 0.6); res(); };
+            audio.play();
+        });
+    } catch(e) { musicGain.gain.setTargetAtTime(0.25, audioCtx.currentTime, 0.1); }
+}
 
-        // --- ГЕНЕРАЦИЯ ---
-        const img = document.getElementById('main-img');
-        const promptIn = document.getElementById('prompt-in');
-        const historyBox = document.getElementById('history-box');
-        const viewport = document.getElementById('viewport');
-        const genBtn = document.getElementById('gen-btn');
-        let history = JSON.parse(localStorage.getItem('hit_history')) || [];
-        let curW = 1024, curH = 1024;
-        let activeTimeout = null;
+function pcmToWav(b, r) {
+    const raw = atob(b); const pcm = new Int16Array(new Uint8Array([...raw].map(c => c.charCodeAt(0))).buffer);
+    const buf = new ArrayBuffer(44 + pcm.length * 2); const v = new DataView(buf);
+    const s = (o, t) => { for(let i=0; i<t.length; i++) v.setUint8(o+i, t.charCodeAt(i)); };
+    s(0, 'RIFF'); v.setUint32(4, 32 + pcm.length * 2, true); s(8, 'WAVE'); s(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, r, true); v.setUint32(28, r * 2, true); v.setUint16(32, 2, true);
+    v.setUint16(34, 16, true); s(36, 'data'); v.setUint32(40, pcm.length * 2, true);
+    for(let i=0; i<pcm.length; i++) v.setInt16(44 + i * 2, pcm[i], true);
+    return new Blob([buf], { type: 'audio/wav' });
+}
 
-        async function handleGenerate() {
-            checkLimits();
-            if(!promptIn.value) return;
+async function startPodcast() {
+    document.getElementById('start-overlay').style.display = 'none';
+    initAudio();
+    
+    let currentImage = await callAI('image', "Hyper-realistic podcast studio background, cinematic neon lighting, HIT VISUAL aesthetic, futuristic digital art");
+    
+    while(true) {
+        const stage = document.getElementById('art-display');
+        stage.style.opacity = "0";
+        setTimeout(() => { stage.src = currentImage; stage.style.opacity = "1"; }, 100);
 
-            if(genCount >= DAILY_LIMIT) {
-                showAd((ok) => { if(ok) runGen(); });
-            } else {
-                runGen();
-            }
-        }
+        // Бот ведет подкаст
+        const podcastSpeech = await callAI('text', "Начни новую мысль для подкаста HIT VISUAL. Порассуждай о визуальной революции и покажи нам новый хит.");
+        const speechTask = speak(podcastSpeech);
 
-        async function runGen() {
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('idle').classList.add('hidden');
-            img.style.display = 'none';
-            genBtn.disabled = true;
-            genBtn.innerText = "ПРОЦЕСС...";
+        // Параллельно готовим СЛЕДУЮЩИЙ визуальный хит под его слова
+        document.getElementById('buff-status').innerText = "STREAMING";
+        const nextPrompt = await callAI('text', "Create a trend-setting hyper-realistic prompt for the next hit. English only.");
+        const nextImageTask = callAI('image', nextPrompt + ", global trend, cinematic masterpiece");
 
-            const seed = Math.floor(Math.random()*999999);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptIn.value)}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=flux`;
+        await speechTask;
+        currentImage = await nextImageTask;
+        document.getElementById('buff-status').innerText = "ONLINE";
 
-            const t = new Image();
-            t.crossOrigin = "anonymous";
-            
-            activeTimeout = setTimeout(() => {
-                alert("Ошибка сети или долгий ответ. Попробуйте еще раз.");
-                resetUI();
-            }, 40000);
-
-            t.onload = () => {
-                clearTimeout(activeTimeout);
-                img.src = url;
-                img.style.display = 'block';
-                resetUI();
-                document.getElementById('save-btn').classList.remove('hidden');
-                
-                if(!history.includes(url)) {
-                    history.unshift(url);
-                    if(history.length > 8) history.pop();
-                    localStorage.setItem('hit_history', JSON.stringify(history));
-                    renderHistory();
-                }
-
-                genCount++;
-                localStorage.setItem('hit_gen_count', genCount);
-                updateBadge();
-                vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
-            };
-
-            t.onerror = () => {
-                clearTimeout(activeTimeout);
-                alert("Ошибка загрузки. Попробуйте другой запрос.");
-                resetUI();
-            };
-
-            t.src = url;
-        }
-
-        function resetUI() {
-            document.getElementById('loader').classList.add('hidden');
-            genBtn.disabled = false;
-            genBtn.innerText = "СОЗДАТЬ";
-        }
-
-        // --- ДОП ФУНКЦИИ ---
-        function setPrompt(t) {
-            const ps = {
-                cyber: "cyberpunk city, neon, futuristic 8k",
-                fantasy: "magic world, dragon, ethereal landscape",
-                photo: "professional portrait, studio lighting, hyperrealism",
-                anime: "high quality anime style, vibrant colors"
-            };
-            promptIn.value = ps[t];
-            promptIn.focus();
-        }
-
-        function setRatio(r, btn) {
-            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if(r === '1:1') { curW=1024; curH=1024; viewport.style.aspectRatio = "1/1"; }
-            if(r === '9:16') { curW=768; curH=1344; viewport.style.aspectRatio = "9/16"; }
-            if(r === '16:9') { curW=1216; curH=688; viewport.style.aspectRatio = "16/9"; }
-        }
-
-        function renderHistory() {
-            historyBox.innerHTML = history.map(u => `
-                <img src="${u}" data-src="${u}" class="history-thumb" onclick="loadFromHistory(this)">
-            `).join('');
-        }
-
-        function loadFromHistory(el) {
-            img.src = el.dataset.src;
-            img.style.display = 'block';
-            document.getElementById('idle').classList.add('hidden');
-            document.getElementById('save-btn').classList.remove('hidden');
-            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const isD = document.body.classList.contains('dark');
-            document.getElementById('theme-btn').innerText = isD ? '☀️' : '🌙';
-            localStorage.setItem('theme', isD ? 'dark' : 'light');
-        }
-
-        function toggleFS() { if(img.src) viewport.classList.toggle('fs'); }
-
-        async function downloadArt() {
-            if(img.src) vkBridge.send("VKWebAppShowImages", { images: [img.src] });
-        }
-
-        window.onload = () => {
-            checkLimits();
-            renderHistory();
-            if(localStorage.getItem('theme') === 'light') toggleTheme();
-        };
-    </script>
+        await new Promise(r => setTimeout(r, 4000));
+    }
+}
+</script>
 </body>
 </html>
+
 
 
