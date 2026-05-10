@@ -3,381 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
     <title>HIT VISUAL LUXURY</title>
-    
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Montserrat:wght@400;600;700&display=swap');
-        
-        :root {
-            --neon: #00e5ff;
-            --pink: #ff007b;
-            --bg: #05070a;
-            --text: #f8fafc;
-            --card: rgba(13, 17, 23, 0.98);
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        :root { --neon: #00e5ff; --pink: #ff007b; --bg: #05070a; }
+        body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; height: 100vh; overflow: hidden; margin: 0; }
         .sync { font-family: 'Syncopate', sans-serif; }
-
-        .glow-title {
-            font-size: 10px;
-            letter-spacing: 0.5em;
-            background: linear-gradient(90deg, var(--neon), var(--pink), #7000ff, var(--neon));
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: rainbow 4s linear infinite;
+        
+        /* Исправление: Красивые алерты вместо нативных */
+        #custom-alert {
+            display: none; position: fixed; top: 20px; left: 20px; right: 20px; 
+            background: rgba(255, 0, 123, 0.9); backdrop-filter: blur(10px);
+            padding: 15px; border-radius: 15px; z-index: 2000; text-align: center;
+            font-size: 11px; font-weight: bold; text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(255, 0, 123, 0.3);
         }
-        @keyframes rainbow { to { background-position: 200% center; } }
 
         .art-viewport {
-            flex: 1;
-            margin: 15px;
-            background: #000;
-            border-radius: 32px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.03);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            flex: 1; margin: 15px; background: #000; border-radius: 30px;
+            position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center;
         }
 
-        #main-img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            transition: opacity 0.8s ease;
-            cursor: pointer;
+        #main-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease; }
+        
+        .loader-ring {
+            width: 50px; height: 50px; border: 3px solid rgba(0, 229, 255, 0.1);
+            border-top-color: var(--neon); border-radius: 50%; animation: spin 1s linear infinite;
         }
-
-        .art-viewport.fs {
-            position: fixed; inset: 0; margin: 0; z-index: 100; border-radius: 0;
-        }
-        .art-viewport.fs #main-img { object-fit: contain; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .ui-panel {
-            background: var(--card);
-            backdrop-filter: blur(25px);
-            padding: 20px 20px calc(25px + env(safe-area-inset-bottom));
-            border-radius: 40px 40px 0 0;
-            box-shadow: 0 -15px 50px rgba(0,0,0,0.6);
-            z-index: 50;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(20px);
+            padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+            border-radius: 35px 35px 0 0; border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        .chip {
-            padding: 10px 16px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            font-size: 10px;
-            font-weight: 700;
-            white-space: nowrap;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.3s;
-        }
-        .chip.active { background: var(--neon); color: #000; border-color: var(--neon); }
-
-        .btn {
-            width: 100%; padding: 18px; border-radius: 20px;
-            font-family: 'Syncopate', sans-serif; font-size: 10px;
-            font-weight: 700; transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--neon), #00a2ff); 
-            color: #000;
-            box-shadow: 0 8px 25px rgba(0, 229, 255, 0.2);
-        }
-        .btn-primary:disabled { opacity: 0.2; }
+        input { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; width: 100%; outline: none; }
+        .btn-gen { background: linear-gradient(135deg, var(--neon), #00a2ff); color: #000; font-weight: 800; border-radius: 15px; padding: 18px; width: 100%; }
+        .btn-gen:disabled { filter: grayscale(1); opacity: 0.5; }
         
-        .modal-overlay {
-            display: none;
-            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000;
-            align-items: center; justify-content: center; padding: 25px;
-            backdrop-filter: blur(20px);
-        }
-
-        .ad-placeholder {
-            background: linear-gradient(160deg, #111827, #020617);
-            border: 1px solid rgba(0, 229, 255, 0.1);
-            border-radius: 35px;
-            padding: 50px 20px;
-            width: 100%;
-            box-shadow: 0 25px 50px -12px rgba(0, 229, 255, 0.1);
-        }
-
-        .progress-line {
-            position: absolute; top: 0; left: 0; height: 3px;
-            background: var(--neon); width: 0%; transition: width 0.4s ease;
-            z-index: 20;
-        }
-
-        input { font-size: 16px !important; color: #fff !important; }
+        .chip { padding: 8px 15px; background: rgba(255,255,255,0.05); border-radius: 12px; font-size: 10px; font-weight: 700; }
+        .chip.active { background: var(--neon); color: #000; }
     </style>
 </head>
 <body>
 
-    <!-- РЕКЛАМНЫЙ БАННЕР -->
-    <div id="ad-modal" class="modal-overlay">
-        <div class="max-w-sm w-full text-center">
-            <div class="ad-placeholder mb-10">
-                <div class="text-5xl mb-6 animate-bounce">💎</div>
-                <h3 class="sync text-[13px] text-cyan-400 mb-3 tracking-[5px]">МЕСТО СВОБОДНО</h3>
-                <p class="text-[9px] opacity-40 uppercase tracking-[3px] leading-relaxed">
-                    Ваш бренд в центре ИИ-потока<br>
-                    Премиальная аудитория<br>
-                    TG: @your_ads_here
-                </p>
-            </div>
-            
-            <button id="ad-watch-btn" class="w-full py-6 bg-white text-black rounded-2xl font-bold sync text-[10px] tracking-[2px] disabled:opacity-20 transition-all">
-                СМОТРЕТЬ (15 С)
-            </button>
-        </div>
-    </div>
+    <div id="custom-alert" class="sync">Ошибка связи. Пробуем еще раз...</div>
 
-    <div class="pt-12 pb-4 px-8 flex justify-between items-center">
-        <div class="glow-title sync uppercase">HIT VISUAL LUXURY</div>
-        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#00e5ff]"></div>
+    <div class="pt-10 px-6 flex justify-between items-center">
+        <div class="sync text-[10px] tracking-[4px] text-cyan-400">HIT VISUAL LUXURY</div>
+        <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_green]"></div>
     </div>
 
     <div class="art-viewport" id="viewport">
-        <div id="p-line" class="progress-line"></div>
-        <div id="loader" class="hidden absolute flex-col items-center z-30">
-            <div class="w-12 h-12 border-2 border-cyan-400/10 border-t-cyan-400 rounded-full animate-spin"></div>
-            <div class="mt-6 text-[8px] tracking-[6px] text-cyan-400/50 font-bold sync uppercase">Dreaming...</div>
+        <div id="loader" class="hidden flex flex-col items-center">
+            <div class="loader-ring"></div>
+            <div class="mt-4 text-[8px] sync opacity-40 tracking-[3px]">GENERATING</div>
         </div>
-        <div id="idle" class="sync opacity-20 text-[9px] tracking-[8px] text-white text-center px-10 uppercase">Luxury AI Engine</div>
-        <img id="main-img" src="" alt="AI Art" onclick="toggleFS()" style="opacity:0">
+        <div id="idle-text" class="sync opacity-20 text-[9px] tracking-[5px] uppercase">Ready for Art</div>
+        <img id="main-img" src="" alt="Result" onclick="this.parentElement.classList.toggle('fs')">
     </div>
 
     <div class="ui-panel">
-        <div class="flex justify-between items-center mb-6">
-            <div id="limit-badge" class="chip !py-1 bg-cyan-500/5 text-cyan-400 border-none">✨ 4 LEFT</div>
-            <div class="text-[7px] opacity-20 sync uppercase tracking-[3px]">Stable Turbo v3</div>
+        <div class="flex gap-2 overflow-x-auto mb-5 no-scrollbar">
+            <button onclick="setFast('cyberpunk city')" class="chip active">CITY</button>
+            <button onclick="setFast('cyberpunk girl')" class="chip">AVATAR</button>
+            <button onclick="setFast('luxury car')" class="chip">CAR</button>
         </div>
 
-        <div class="flex gap-2 overflow-x-auto mb-6 no-scrollbar">
-            <button onclick="setPrompt('cyber')" class="chip active" id="chip-cyber">КИБЕРПАНК</button>
-            <button onclick="setPrompt('fantasy')" class="chip" id="chip-fantasy">ФЭНТЕЗИ</button>
-            <button onclick="setPrompt('photo')" class="chip" id="chip-photo">ПОРТРЕТ</button>
-            <button onclick="setPrompt('anime')" class="chip" id="chip-anime">АНИМЕ</button>
-        </div>
+        <input type="text" id="prompt-in" class="mb-5" placeholder="Опишите идею...">
 
-        <div class="mb-6">
-            <div class="bg-white/[0.03] rounded-2xl p-5 border border-white/[0.05]">
-                <input type="text" id="prompt-in" class="w-full bg-transparent outline-none text-[15px] font-medium" placeholder="Что создадим?">
-            </div>
-        </div>
-
-        <div class="flex gap-3 mb-8">
-            <button onclick="setRatio('1:1', this)" class="chip ratio-btn active">1:1</button>
-            <button onclick="setRatio('9:16', this)" class="chip ratio-btn">9:16</button>
-            <button onclick="setRatio('16:9', this)" class="chip ratio-btn">16:9</button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <button id="gen-btn" onclick="handleGenerate()" class="btn btn-primary">СОЗДАТЬ</button>
-            <button id="save-btn" onclick="downloadArt()" class="btn bg-white/[0.03] text-white opacity-0 pointer-events-none transition-all duration-500">СКАЧАТЬ</button>
+        <div class="flex gap-4">
+            <button id="gen-btn" onclick="startGeneration()" class="btn-gen sync text-[10px]">ПУСК</button>
+            <button id="save-btn" onclick="saveArt()" class="btn-gen sync text-[10px] bg-none bg-white/10 text-white hidden">💾</button>
         </div>
     </div>
 
     <script>
         vkBridge.send("VKWebAppInit");
 
-        const DAILY_LIMIT = 4;
-        let genCount = parseInt(localStorage.getItem('hit_gen_count')) || 0;
-        let lastDate = localStorage.getItem('hit_gen_date') || '';
-        let isGenerating = false;
-        let curW = 768, curH = 768;
+        let isWorking = false;
+        let attempt = 0;
 
-        function checkLimits() {
-            const today = new Date().toDateString();
-            if(lastDate !== today) {
-                genCount = 0;
-                lastDate = today;
-                localStorage.setItem('hit_gen_count', '0');
-                localStorage.setItem('hit_gen_date', today);
-            }
-            updateBadge();
+        function showAlert(msg, dur = 3000) {
+            const a = document.getElementById('custom-alert');
+            a.innerText = msg;
+            a.style.display = 'block';
+            setTimeout(() => { a.style.display = 'none'; }, dur);
         }
 
-        function updateBadge() {
-            const rem = Math.max(0, DAILY_LIMIT - genCount);
-            const badge = document.getElementById('limit-badge');
-            badge.innerText = rem > 0 ? `✨ ${rem} LEFT` : `🎬 WATCH AD`;
-            badge.style.color = rem > 0 ? '#00e5ff' : '#ff007b';
+        function setFast(p) {
+            document.getElementById('prompt-in').value = p;
         }
 
-        async function handleGenerate() {
-            if(isGenerating) return;
+        async function startGeneration() {
+            if (isWorking) return;
             const prompt = document.getElementById('prompt-in').value;
-            if(!prompt) return;
+            if (!prompt) return showAlert("Введите промпт!");
 
-            checkLimits();
-            if(genCount >= DAILY_LIMIT) {
-                showAdModal();
+            isWorking = true;
+            attempt = 0;
+            updateUI(true);
+            generate(prompt);
+        }
+
+        function updateUI(loading) {
+            const btn = document.getElementById('gen-btn');
+            const loader = document.getElementById('loader');
+            const idle = document.getElementById('idle-text');
+            const img = document.getElementById('main-img');
+            const dot = document.getElementById('status-dot');
+
+            btn.disabled = loading;
+            btn.innerText = loading ? "ОЖИДАНИЕ..." : "ПУСК";
+            dot.className = loading ? "w-2 h-2 bg-yellow-500 animate-pulse" : "w-2 h-2 bg-green-500";
+            
+            if (loading) {
+                loader.classList.remove('hidden');
+                idle.classList.add('hidden');
+                img.style.opacity = "0";
             } else {
-                runGen();
+                loader.classList.add('hidden');
+                img.style.opacity = "1";
             }
         }
 
-        async function runGen() {
-            isGenerating = true;
-            const loader = document.getElementById('loader');
-            const idle = document.getElementById('idle');
-            const genBtn = document.getElementById('gen-btn');
-            const saveBtn = document.getElementById('save-btn');
-            const pLine = document.getElementById('p-line');
-            const mainImg = document.getElementById('main-img');
+        function generate(prompt) {
+            attempt++;
+            const seed = Math.floor(Math.random() * 1000000);
+            // Добавляем уникальный параметр time, чтобы браузер не брал картинку из кэша ошибок
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=1024&height=1024&nologo=true&t=${Date.now()}`;
 
-            loader.classList.remove('hidden');
-            idle.classList.add('hidden');
-            genBtn.disabled = true;
-            genBtn.innerText = "WAIT...";
-            pLine.style.width = "10%";
-
-            const seed = Math.floor(Math.random()*9999999);
-            const userPrompt = document.getElementById('prompt-in').value;
-            const finalPrompt = encodeURIComponent(userPrompt + ", highly detailed digital art, 8k, cinematic, luxury");
+            const img = new Image();
+            img.crossOrigin = "anonymous";
             
-            // Основной движок
-            const url = `https://image.pollinations.ai/prompt/${finalPrompt}?seed=${seed}&width=${curW}&height=${curH}&nologo=true&model=turbo&enhance=false`;
-
-            let prg = 10;
-            const prgItv = setInterval(() => {
-                if(prg < 90) prg += 2;
-                pLine.style.width = prg + "%";
-            }, 300);
-
-            const t = new Image();
-            t.crossOrigin = "anonymous";
-            
-            // Таймер смены движка при задержке
-            const fallbackTimer = setTimeout(() => {
-                if(isGenerating) {
-                    t.src = `https://image.pollinations.ai/prompt/${finalPrompt}?seed=${seed+1}&width=${curW}&height=${curH}&nologo=true`;
+            // Тайм-аут на 15 секунд
+            const timer = setTimeout(() => {
+                if (attempt < 2) {
+                    showAlert("СЕРВЕР ЗАНЯТ. ПОВТОР...");
+                    generate(prompt);
+                } else {
+                    fail();
                 }
-            }, 10000);
+            }, 15000);
 
-            t.onload = () => {
-                clearTimeout(fallbackTimer);
-                clearInterval(prgItv);
-                pLine.style.width = "100%";
-                
-                mainImg.src = t.src;
-                mainImg.style.opacity = "1";
-                
-                isGenerating = false;
-                loader.classList.add('hidden');
-                genBtn.disabled = false;
-                genBtn.innerText = "СОЗДАТЬ";
-                
-                // Показываем кнопку скачивания
-                saveBtn.classList.remove('opacity-0', 'pointer-events-none');
-                
-                genCount++;
-                localStorage.setItem('hit_gen_count', genCount);
-                updateBadge();
-                
-                setTimeout(() => pLine.style.width = "0%", 400);
+            img.onload = () => {
+                clearTimeout(timer);
+                document.getElementById('main-img').src = img.src;
+                document.getElementById('save-btn').classList.remove('hidden');
+                isWorking = false;
+                updateUI(false);
                 vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
             };
 
-            t.onerror = () => {
-                clearInterval(prgItv);
-                pLine.style.width = "0%";
-                alert("Ошибка ИИ. Попробуйте другой запрос.");
-                resetUI();
-            };
-
-            t.src = url;
-        }
-
-        function resetUI() {
-            isGenerating = false;
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('gen-btn').disabled = false;
-            document.getElementById('gen-btn').innerText = "СОЗДАТЬ";
-        }
-
-        function setPrompt(t) {
-            const ps = {
-                cyber: "cyberpunk luxury car in neon city",
-                fantasy: "ethereal magic dragon in crystal cave",
-                photo: "fashion model portrait, gold lighting",
-                anime: "luxury anime aesthetic room, lofi vibe"
-            };
-            document.getElementById('prompt-in').value = ps[t];
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            document.getElementById('chip-' + t).classList.add('active');
-            vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "light"});
-        }
-
-        function setRatio(r, btn) {
-            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if(r === '1:1') { curW=768; curH=768; viewport.style.aspectRatio = "1/1"; }
-            if(r === '9:16') { curW=512; curH=896; viewport.style.aspectRatio = "9/16"; }
-            if(r === '16:9') { curW=896; curH=512; viewport.style.aspectRatio = "16/9"; }
-        }
-
-        function showAdModal() {
-            const modal = document.getElementById('ad-modal');
-            const btn = document.getElementById('ad-watch-btn');
-            
-            modal.style.display = 'flex';
-            btn.disabled = true;
-            
-            let time = 15;
-            const itv = setInterval(() => {
-                time--;
-                btn.innerText = `СМОТРЕТЬ (${time} С)`;
-                if(time <= 0) {
-                    clearInterval(itv);
-                    btn.disabled = false;
-                    btn.innerText = "ПОЛУЧИТЬ ✨";
-                    btn.onclick = () => {
-                        modal.style.display = 'none';
-                        genCount = 0; 
-                        updateBadge();
-                        runGen();
-                    };
+            img.onerror = () => {
+                clearTimeout(timer);
+                if (attempt < 2) {
+                    generate(prompt);
+                } else {
+                    fail();
                 }
-            }, 1000);
+            };
+
+            img.src = url;
         }
 
-        function toggleFS() { 
-            const img = document.getElementById('main-img');
-            if(img.src && !isGenerating) viewport.classList.toggle('fs'); 
+        function fail() {
+            isWorking = false;
+            updateUI(false);
+            showAlert("ОШИБКА ИИ. ПОПРОБУЙТЕ ПОЗЖЕ");
+            document.getElementById('idle-text').classList.remove('hidden');
         }
 
-        function downloadArt() {
-            const img = document.getElementById('main-img');
-            if(img.src && !isGenerating) {
-                vkBridge.send("VKWebAppShowImages", { images: [img.src] });
-            }
+        function saveArt() {
+            const src = document.getElementById('main-img').src;
+            if (src) vkBridge.send("VKWebAppShowImages", { images: [src] });
         }
-
-        window.onload = checkLimits;
     </script>
 </body>
 </html>
