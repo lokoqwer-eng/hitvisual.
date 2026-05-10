@@ -11,49 +11,42 @@
         
         :root { 
             --neon: #00f2ff; 
-            --bg: #07090f; 
+            --bg: #07090f;
+            --vh: 1vh; 
         }
 
-        /* Исправление высоты для мобильных устройств */
         html, body {
-            height: 100%;
+            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
             margin: 0;
             padding: 0;
             background: var(--bg);
             overflow: hidden;
-        }
-
-        body {
             display: flex;
             flex-direction: column;
-            font-family: 'Unbounded', sans-serif;
-            color: #fff;
         }
 
         .sync { font-family: 'Unbounded', sans-serif; font-weight: 900; }
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Верхняя панель */
+        /* Шапка с безопасным отступом сверху */
         .header {
-            padding-top: calc(env(safe-area-inset-top) + 20px);
-            padding-left: 20px;
-            padding-right: 20px;
-            padding-bottom: 15px;
+            padding: calc(env(safe-area-inset-top) + 15px) 20px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 50;
+            background: linear-gradient(to bottom, rgba(7,9,15,1), rgba(7,9,15,0));
         }
 
-        /* Главный экран - занимает всё свободное место */
+        /* Главный экран */
         .viewport {
-            flex-grow: 1;
+            flex: 1;
             margin: 0 15px;
             background: #000;
-            border-radius: 30px;
+            border-radius: 24px;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(0, 242, 255, 0.15);
+            border: 1px solid rgba(0, 242, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -63,168 +56,163 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: opacity 0.8s ease;
+            transition: opacity 0.5s ease;
             opacity: 0;
         }
 
-        /* Вебка ведущего */
+        /* Вебка ИИ */
         .host-cam {
             position: absolute;
             bottom: 15px;
             right: 15px;
-            width: 75px;
-            height: 95px;
-            background: rgba(0,0,0,0.85);
-            border: 1.5px solid var(--neon);
-            border-radius: 16px;
+            width: 70px;
+            height: 90px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--neon);
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 30;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            z-index: 10;
         }
 
-        .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; border-radius: 1px; margin: 0 1px; }
+        .v-bar { width: 3px; background: var(--neon); height: 2px; transition: height 0.1s; margin: 0 1px; }
 
-        /* Нижняя панель */
+        /* Панель управления */
         .ui-panel {
             padding: 20px 20px calc(env(safe-area-inset-bottom) + 20px);
-            background: rgba(10, 12, 18, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 40px 40px 0 0;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            margin-top: 15px;
+            background: #0d1117;
+            border-radius: 32px 32px 0 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 10px;
         }
 
         .btn-mode {
-            padding: 10px 20px;
-            border-radius: 15px;
+            padding: 8px 18px;
+            border-radius: 12px;
             font-size: 10px;
             font-weight: 700;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
         }
         .btn-mode.active {
             background: var(--neon);
             color: #000;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
         }
 
         input {
-            background: rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             width: 100%;
-            padding: 16px;
-            border-radius: 20px;
-            outline: none;
+            padding: 14px;
+            border-radius: 16px;
             color: #fff;
-            font-size: 16px; /* Предотвращает зум в iOS */
+            font-size: 14px;
         }
 
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: rgba(255,255,255,0.4);
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-        .dot { width: 6px; height: 6px; background: #ff004c; border-radius: 50%; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* Загрузчик */
+        /* Стильный лоадер */
         #loader {
-            position: absolute;
+            position: fixed;
             inset: 0;
-            background: #000;
+            background: #07090f;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 1000;
         }
+
+        .pulse-text { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="text-cyan-400 sync text-2xl animate-pulse mb-2">HIT VISUAL</div>
-        <div class="w-12 h-0.5 bg-cyan-900 overflow-hidden">
-            <div class="w-full h-full bg-cyan-400 -translate-x-full animate-[loading_1.5s_infinite]"></div>
-        </div>
-        <style>@keyframes loading { to { transform: translateX(100%); } }</style>
+        <div class="sync text-cyan-400 text-xl pulse-text mb-4">HIT VISUAL</div>
+        <div class="text-[8px] mono tracking-[4px] text-white/30 uppercase">Инициализация ИИ...</div>
     </div>
 
     <div class="header">
         <div>
-            <div class="text-[14px] sync tracking-tighter text-[#00f2ff]">HIT VISUAL</div>
-            <div class="text-[8px] opacity-40 mono tracking-[3px]">FREE AI PODCAST</div>
+            <div class="text-[14px] sync text-white">HIT VISUAL</div>
+            <div class="text-[7px] mono text-cyan-500/60 uppercase tracking-[2px]">Core System</div>
         </div>
-        <div class="flex gap-2 p-1 bg-white/5 rounded-2xl">
+        <div class="flex gap-1 bg-white/5 p-1 rounded-xl">
             <button id="m-auto" onclick="setMode('auto')" class="btn-mode active">ЭФИР</button>
             <button id="m-man" onclick="setMode('manual')" class="btn-mode">МАСТЕР</button>
         </div>
     </div>
 
     <div class="viewport" id="stage">
-        <img id="main-img" src="" alt="AI ART">
+        <!-- Заглушка на случай сбоя загрузки -->
+        <div class="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center opacity-20">
+            <div class="sync text-4xl text-white/10">HIT VISUAL</div>
+        </div>
         
-        <div id="inner-loader" class="absolute hidden flex flex-col items-center">
-            <div class="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+        <img id="main-img" src="" alt="AI Art">
+        
+        <div id="status-icon" class="absolute top-4 left-4 flex items-center gap-2">
+            <div class="w-2 h-2 bg-red-600 rounded-full animate-ping"></div>
+            <div class="text-[8px] mono text-white/40 uppercase">Broadcast</div>
         </div>
 
         <div class="host-cam">
-            <div class="text-[7px] font-bold text-[#00f2ff] mb-2">AI HOST</div>
-            <div class="flex items-end h-[22px]" id="viz"></div>
+            <div class="text-[6px] font-bold text-cyan-400 mb-2">HOST</div>
+            <div class="flex items-end h-[20px]" id="viz"></div>
         </div>
     </div>
 
     <div class="ui-panel">
         <div id="auto-ui">
-            <div class="status-badge">
-                <div class="dot"></div> LIVE STREAM
-            </div>
-            <div id="ai-text" class="text-[12px] leading-relaxed text-white/80 italic border-l-2 border-cyan-500/30 pl-4 py-1">
-                "Синхронизация с цифровым потоком..."
+            <div id="ai-text" class="text-[11px] leading-relaxed text-white/60 italic border-l-2 border-cyan-500/50 pl-4 py-1">
+                Подключаемся к нейросети...
             </div>
         </div>
 
         <div id="manual-ui" class="hidden">
-            <input type="text" id="user-prompt" placeholder="Опишите новый хит...">
-            <button onclick="manualGenerate()" class="w-full mt-4 py-4 bg-[#00f2ff] text-black rounded-2xl font-black sync text-[11px] active:scale-95 transition-transform">
-                СОЗДАТЬ
-            </button>
+            <input type="text" id="user-prompt" placeholder="Опишите новый шедевр...">
+            <button onclick="handleManual()" class="w-full mt-3 py-3 bg-cyan-400 text-black rounded-xl font-black sync text-[10px]">ГЕНЕРИРОВАТЬ</button>
         </div>
     </div>
 
 <script>
+    // Фикс высоты для мобилок
+    function fixHeight() {
+        let vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', fixHeight);
+    fixHeight();
+
     vkBridge.send("VKWebAppInit");
-    
+
     let mode = 'auto';
     let isSpeaking = false;
     const phrases = [
-        "HIT VISUAL — это точка, где цифровое становится реальным.",
-        "Мы создаем эстетику будущего. Посмотрите на этот кадр.",
-        "Каждый арт здесь — это визуальный хит. Мы задаем тренды.",
-        "Будущее искусства уже на ваших экранах. Стираем границы.",
-        "Визуальная революция продолжается. Только премиальный контент."
+        "HIT VISUAL: Будущее уже загружено в ваш поток.",
+        "Этот арт синтезирован специально для вашего эфира.",
+        "Визуальная эстетика нового поколения. Смотрите.",
+        "Границы реальности стерты нейронными связями.",
+        "Каждый кадр — это хит. Добро пожаловать в завтра."
     ];
 
-    // Визуализатор голоса
+    // Визуализатор
     const viz = document.getElementById('viz');
-    for(let i=0; i<6; i++) {
+    for(let i=0; i<5; i++) {
         const b = document.createElement('div'); b.className = 'v-bar'; viz.appendChild(b);
     }
-    function animateViz() {
+    setInterval(() => {
         const bars = document.getElementsByClassName('v-bar');
-        for(let b of bars) b.style.height = (isSpeaking ? Math.random()*22 + 2 : 2) + 'px';
-        requestAnimationFrame(animateViz);
-    }
-    animateViz();
+        for(let b of bars) b.style.height = (isSpeaking ? Math.random()*20 + 2 : 2) + 'px';
+    }, 100);
+
+    // Убираем лоадер через 3 секунды ГАРАНТИРОВАННО
+    setTimeout(() => {
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+    }, 3000);
 
     function setMode(m) {
         mode = m;
@@ -239,7 +227,7 @@
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
         const m = new SpeechSynthesisUtterance(text);
-        m.lang = 'ru-RU'; m.rate = 1; m.pitch = 0.9;
+        m.lang = 'ru-RU'; m.rate = 1;
         m.onstart = () => isSpeaking = true;
         m.onend = () => isSpeaking = false;
         window.speechSynthesis.speak(m);
@@ -250,31 +238,26 @@
         const text = phrases[Math.floor(Math.random()*phrases.length)];
         document.getElementById('ai-text').innerText = text;
         
-        const seed = Math.floor(Math.random()*999999);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent("ultra realistic luxury futuristic art hit visual style 8k")}?seed=${seed}&nologo=true&width=1024&height=1280`;
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent("luxury futuristic digital art hit visual aesthetic 8k")}?seed=${Math.random()}&nologo=true&width=1024&height=1280`;
         
         const img = document.getElementById('main-img');
         img.src = url;
         img.onload = () => {
-            document.getElementById('loader').style.display = 'none';
             img.style.opacity = 1;
             speak(text);
-            setTimeout(() => { if(mode === 'auto') startAuto(); }, 10000);
+            setTimeout(() => { if(mode === 'auto') startAuto(); }, 12000);
         };
     }
 
-    async function manualGenerate() {
+    async function handleManual() {
         const p = document.getElementById('user-prompt').value;
         if(!p) return;
-        document.getElementById('inner-loader').classList.remove('hidden');
         const img = document.getElementById('main-img');
-        img.style.opacity = 0.3;
-        
+        img.style.opacity = 0.4;
         const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?seed=${Math.random()}&nologo=true&width=1024&height=1280`;
         img.src = url;
         img.onload = () => {
             img.style.opacity = 1;
-            document.getElementById('inner-loader').classList.add('hidden');
             vkBridge.send("VKWebAppTapticNotificationOccurred", {"type": "success"});
         };
     }
