@@ -3,189 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI VTuber Intelligence</title>
+    <title>AI Neuro Streamer Pro</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Montserrat:wght@300;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Montserrat:wght@300;600;800&display=swap');
         
-        :root { --accent: #00f2ff; }
+        :root { --accent: #00f2ff; --bg-dark: rgba(10, 10, 18, 0.85); }
         body { background: #000; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
 
         /* ФОН КОМНАТЫ */
-        #room {
+        #room-bg {
             position: absolute; inset: 0;
-            background-image: url('uploaded:1000122229.jpg-1249a07a-0b10-4a5d-8b1c-24693dc06a62');
+            background-image: url('uploaded:1000122230.jpg-f341b961-4115-4041-b8bc-3e70cc94bfb8');
             background-size: cover; background-position: center;
-            filter: brightness(0.5) contrast(1.1); z-index: 1;
+            filter: brightness(0.6) contrast(1.1); z-index: 1;
         }
 
         /* ЛОГОТИП ГРУППЫ */
         #brand-logo {
-            position: absolute; top: 20px; left: 20px;
-            width: 60px; height: 60px;
+            position: absolute; top: 15px; left: 15px;
+            width: 55px; height: 55px;
             background-image: url('uploaded:1000122084.png-5b19d047-9013-454e-8fb6-40c30781f53f');
             background-size: contain; background-repeat: no-repeat;
-            z-index: 150; filter: drop-shadow(0 0 15px var(--accent));
+            z-index: 150; filter: drop-shadow(0 0 10px var(--accent));
         }
 
-        /* СТРИМЕРША */
+        /* ПЕРСОНАЖ */
         .stage {
             position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 500px; height: 100%;
+            width: 100%; max-width: 450px; height: 80%;
             display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            z-index: 20; pointer-events: none;
+            z-index: 10; pointer-events: none;
         }
 
-        .character { transform-origin: bottom center; animation: sway 5s ease-in-out infinite; }
-        @keyframes sway { 0%, 100% { transform: rotate(-1deg) translateY(0); } 50% { transform: rotate(1deg) translateY(-10px); } }
+        .avatar-container { animation: breathe 4s ease-in-out infinite; transform-origin: bottom center; }
+        @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 
         .head {
-            width: 120px; height: 150px; background: #ffe4d5; border-radius: 60px 60px 75px 75px;
-            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10;
+            width: 115px; height: 145px; background: #ffe4d5; border-radius: 55px 55px 70px 70px;
+            position: relative; box-shadow: 0 8px 25px rgba(0,0,0,0.4); z-index: 5;
         }
         .hair {
-            position: absolute; top: -15px; left: -10px; width: 140px; height: 120px;
-            background: linear-gradient(180deg, var(--accent), #7000ff); border-radius: 70px 70px 30px 30px;
+            position: absolute; top: -12px; left: -8px; width: 130px; height: 115px;
+            background: linear-gradient(180deg, var(--accent), #b026ff); border-radius: 65px 65px 25px 25px;
         }
-        .eye { width: 24px; height: 24px; background: #fff; border-radius: 50%; position: relative; animation: blink 4s infinite; }
-        .eye::after { content: ''; position: absolute; top: 7px; left: 7px; width: 10px; height: 10px; background: #111; border-radius: 50%; }
-        @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
+        .eye { width: 22px; height: 22px; background: #fff; border-radius: 50%; position: relative; animation: blink 5s infinite; }
+        .eye::after { content: ''; position: absolute; top: 6px; left: 6px; width: 10px; height: 10px; background: #111; border-radius: 50%; }
+        @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
 
         .mouth {
-            position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
-            width: 22px; height: 6px; background: #ff4081; border-radius: 10px; transition: 0.1s;
+            position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 6px; background: #ff4081; border-radius: 10px; transition: 0.1s;
         }
-        .talking .mouth { animation: speak 0.1s infinite alternate; }
-        @keyframes speak { from { height: 4px; } to { height: 18px; border-radius: 40%; } }
+        .talking .mouth { animation: speak-anim 0.1s infinite alternate; }
+        @keyframes speak-anim { from { height: 4px; } to { height: 16px; border-radius: 40%; } }
 
-        /* ИНТЕРФЕЙС - НЕ ЗАКРЫВАЕТ ОБЗОР */
+        .body-part { width: 140px; height: 200px; background: #1a1a2e; border-radius: 45px 45px 55px 55px; margin-top: -25px; border: 2px solid #333; }
+
+        /* ИНТЕРФЕЙС - ПОДНЯЛИ ВЫШЕ */
         .hud { position: absolute; inset: 0; z-index: 100; pointer-events: none; padding: 20px; display: flex; flex-direction: column; }
-        .glass { background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; pointer-events: auto; }
+        .glass { background: var(--bg-dark); backdrop-filter: blur(12px); border: 1px solid rgba(0,242,255,0.2); border-radius: 16px; pointer-events: auto; }
         
-        #chat-sidebar { position: absolute; right: 20px; bottom: 100px; width: 220px; max-height: 300px; overflow-y: auto; scrollbar-width: none; }
-        .msg { font-size: 10px; margin-bottom: 8px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 8px; border-left: 2px solid var(--accent); }
+        /* ЧАТ - ТЕПЕРЬ СВЕРХУ СБОКУ */
+        #chat-container {
+            position: absolute; top: 80px; right: 20px;
+            width: 240px; max-height: 250px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
+            scrollbar-width: none; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+        .chat-msg { font-size: 11px; padding: 8px 12px; border-radius: 12px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-        .music-info { position: absolute; left: 20px; bottom: 100px; }
+        #start-overlay { background: #000; z-index: 1000; transition: 0.5s; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="gate" class="fixed inset-0 bg-black z-[2000] flex flex-col items-center justify-center cursor-pointer" onclick="init()">
-        <div class="w-24 h-24 border-2 border-cyan-500 rounded-full flex items-center justify-center animate-pulse">
-            <span class="text-cyan-500 font-bold text-xs">LAUNCH AI</span>
+    <div id="start-overlay" class="fixed inset-0 flex flex-col items-center justify-center" onclick="startStream()">
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 border-2 border-cyan-500 rounded-full animate-ping opacity-20"></div>
+            <div class="absolute inset-0 border border-cyan-500 rounded-full flex items-center justify-center">
+                <span class="text-cyan-500 font-black text-[10px] tracking-widest uppercase">Go Live</span>
+            </div>
         </div>
-        <div class="mt-4 text-[9px] uppercase tracking-[4px] text-white/30">Инициализация нейро-интерфейса</div>
+        <div class="text-[8px] uppercase tracking-[6px] text-white/30">Connect to neural host</div>
     </div>
 
-    <div id="room"></div>
+    <div id="room-bg"></div>
     <div id="brand-logo"></div>
 
     <div class="stage">
-        <div id="char-rig" class="character">
+        <div id="character-rig" class="avatar-container">
             <div class="head">
                 <div class="hair"></div>
                 <div class="flex justify-around mt-16 px-4"><div class="eye"></div><div class="eye"></div></div>
                 <div id="mouth" class="mouth"></div>
             </div>
-            <div class="w-40 h-48 bg-[#1a1a2e] border-2 border-[#333] rounded-[50px] -mt-6"></div>
+            <div class="body-part"></div>
         </div>
     </div>
 
     <div class="hud">
-        <!-- TOP PANEL -->
-        <div class="flex justify-between items-start">
+        <div class="flex justify-between items-start pointer-events-auto">
             <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-2">
-                    <div class="bg-red-600 px-2 py-0.5 rounded text-[9px] font-black uppercase">Live</div>
-                    <div class="glass px-3 py-1 text-[10px] text-cyan-400 font-bold" id="timer">00:00</div>
+                    <div class="bg-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">Live</div>
+                    <div class="glass px-3 py-1 text-[10px] text-cyan-400 font-bold" id="uptime">00:00:00</div>
                 </div>
-                <div class="text-[10px] text-white/50">Mood: <span id="mood" class="text-green-400">Happy</span></div>
+                <div class="text-[10px] text-white/40 uppercase">Радио: <span id="radio-status" class="text-white/80">On</span></div>
+            </div>
+            <div class="glass p-3 flex flex-col items-end">
+                <div class="text-[8px] text-white/40 uppercase">Зрители</div>
+                <div class="text-[14px] font-black text-cyan-500" id="viewer-count">1,842</div>
             </div>
         </div>
 
-        <!-- MUSIC PANEL -->
-        <div class="music-info glass p-3 pointer-events-auto">
-            <div class="text-[8px] text-white/40 uppercase mb-1">Now Playing</div>
-            <div class="text-[11px] font-bold text-cyan-400 truncate w-32" id="track-name">Radio Wave</div>
-            <div class="flex gap-2 mt-2">
-                <button onclick="changeRadio()" class="text-[9px] bg-white/10 px-2 py-1 rounded hover:bg-white/20">Next Station</button>
+        <div id="chat-container"></div>
+
+        <div class="mt-auto flex flex-col gap-3 pointer-events-auto">
+            <div class="glass p-3 flex items-center gap-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div class="text-[10px] font-bold truncate flex-1" id="track-info">Загрузка музыки...</div>
+                <button onclick="nextStation()" class="bg-white/10 p-2 rounded-lg hover:bg-white/20 transition">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
             </div>
-        </div>
-
-        <!-- CHAT SIDEBAR -->
-        <div id="chat-sidebar" class="pointer-events-none"></div>
-
-        <!-- INPUT AREA -->
-        <div class="mt-auto flex gap-2 pointer-events-auto">
-            <input id="user-input" type="text" class="glass flex-1 bg-transparent border-none outline-none px-4 py-3 text-sm" placeholder="Спроси о чем угодно...">
-            <button onclick="handleUser()" class="bg-cyan-500 text-black px-6 py-3 rounded-xl font-black text-[10px] uppercase">Talk</button>
+            <div class="flex gap-2">
+                <input id="chat-input" type="text" class="glass flex-1 bg-transparent border-none outline-none px-5 py-4 text-sm" placeholder="Спроси её о чем-нибудь...">
+                <button onclick="sendMessage()" class="bg-cyan-500 text-black px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-[0_0_20px_rgba(6,182,212,0.4)]">Send</button>
+            </div>
         </div>
     </div>
 
-    <audio id="audio-player" crossorigin="anonymous"></audio>
+    <audio id="radio-player" crossorigin="anonymous" loop></audio>
 
     <script>
         const stations = [
-            { name: "Lofi Hip Hop", url: "https://stream.zeno.fm/0r0xa792kwzuv" },
-            { name: "Cyberpunk Electro", url: "https://icecast.skyrock.net/s/natio_mp3_128k" },
-            { name: "Relax Jazz", url: "https://smoothjazz.com/streams/smoothjazz_128.pls" },
-            { name: "Nightcore Radio", url: "https://stream.zeno.fm/f9scrt81638uv" }
+            { name: "Synthwave Night", url: "https://stream.zeno.fm/0r0xa792kwzuv" },
+            { name: "Lofi Beats", url: "https://stream.zeno.fm/f9scrt81638uv" },
+            { name: "Cyber Radio", url: "https://icecast.skyrock.net/s/natio_mp3_128k" }
         ];
 
-        let currentStation = 0;
-        const player = document.getElementById('audio-player');
-        const chat = document.getElementById('chat-sidebar');
-        const mouth = document.getElementById('mouth');
-        const input = document.getElementById('user-input');
+        let curStation = 0;
         let isSpeaking = false;
+        let aiBusy = false;
+        const player = document.getElementById('radio-player');
+        const chat = document.getElementById('chat-container');
+        const input = document.getElementById('chat-input');
+        const mouth = document.getElementById('mouth');
 
-        function init() {
+        async function startStream() {
             try { vkBridge.send("VKWebAppInit"); } catch(e) {}
-            document.getElementById('gate').style.display = 'none';
-            changeRadio(0);
-            startTimer();
-            addMsg("System", "AI Core Online. Listening for your command.");
+            document.getElementById('start-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('start-overlay').style.display = 'none', 500);
             
-            // Автономный разум: раз в 30 сек она сама что-то решает
-            setInterval(aiAutopilot, 30000);
+            nextStation(0);
+            startUptime();
+            addMsg("System", "Нейросеть подключена. Приятного стрима!", "text-cyan-400");
+            
+            // Авто-мысли стримерши
+            setInterval(autoTalk, 25000);
+            setInterval(simulateChat, 12000);
         }
 
-        function changeRadio(idx = -1) {
-            currentStation = idx === -1 ? (currentStation + 1) % stations.length : idx;
-            player.src = stations[currentStation].url;
-            player.play();
-            document.getElementById('track-name').innerText = stations[currentStation].name;
-            if(idx === -1) aiBrain(`Я переключила радио на ${stations[currentStation].name}, тебе нравится?`, true);
+        function nextStation(idx = -1) {
+            curStation = idx === -1 ? (curStation + 1) % stations.length : idx;
+            player.src = stations[curStation].url;
+            player.play().catch(() => console.log("Audio play blocked"));
+            document.getElementById('track-info').innerText = stations[curStation].name;
+            player.volume = 0.2;
         }
 
-        function addMsg(user, text, isAI = false) {
+        function addMsg(user, text, colorClass = "text-white/80") {
             const div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `<span class="${isAI ? 'text-cyan-400' : 'text-pink-500'} font-bold">${user}:</span> ${text}`;
+            div.className = `chat-msg glass`;
+            div.innerHTML = `<b class="${colorClass} mr-2">${user}:</b> ${text}`;
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
+            if(chat.children.length > 20) chat.removeChild(chat.firstChild);
         }
 
-        async function aiBrain(prompt, isAuto = false) {
-            if(isSpeaking && !isAuto) return;
-            
-            const systemPrompt = `Ты - ИИ-ассистент и стримерша. Ты не просто код, ты разумная личность. 
-            Твои задачи: 1. Помогать пользователю. 2. Веселить чат. 3. Управлять музыкой.
-            Отвечай коротко, дерзко, но мило (до 10 слов). Если пользователь просит сменить музыку - предложи переключить станцию.`;
+        // Продвинутая функция запроса к ИИ с обработкой ошибок
+        async function aiRequest(prompt, isAuto = false) {
+            if (aiBusy && !isAuto) return;
+            aiBusy = true;
 
-            try {
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(systemPrompt)}`);
-                const reply = await res.text();
-                
-                // Проверка команд в ответе
-                if(reply.toLowerCase().includes("смени музыку") || reply.toLowerCase().includes("переключи")) {
-                    changeRadio();
+            const sys = `Ты - популярная ИИ-стримерша. Твой стиль: дружелюбный, немного дерзкий, молодежный. 
+            Короткие ответы до 10 слов. Ты любишь музыку и общение. Если спрашивают про музыку - скажи, что трек крутой.`;
+
+            let success = false;
+            let retryCount = 0;
+
+            while (!success && retryCount < 3) {
+                try {
+                    const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(sys)}&seed=${Math.random()}`);
+                    if (!response.ok) throw new Error("API Limit");
+                    
+                    const reply = await response.text();
+                    addMsg("AI_Girl", reply, "text-cyan-400 font-bold");
+                    speak(reply);
+                    success = true;
+                } catch (e) {
+                    retryCount++;
+                    await new Promise(r => setTimeout(r, 1000 * retryCount));
                 }
-
-                addMsg("AI_ASSISTANT", reply, true);
-                speak(reply);
-            } catch(e) { console.error("Neural Error", e); }
+            }
+            aiBusy = false;
         }
 
         function speak(text) {
@@ -193,43 +217,50 @@
             window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'ru-RU';
-            utter.pitch = 1.3;
-            utter.onstart = () => { isSpeaking = true; document.getElementById('char-rig').classList.add('talking'); };
-            utter.onend = () => { isSpeaking = false; document.getElementById('char-rig').classList.remove('talking'); };
+            utter.pitch = 1.4;
+            utter.onstart = () => { isSpeaking = true; document.getElementById('character-rig').classList.add('talking'); };
+            utter.onend = () => { isSpeaking = false; document.getElementById('character-rig').classList.remove('talking'); };
             window.speechSynthesis.speak(utter);
         }
 
-        function handleUser() {
+        function sendMessage() {
             const val = input.value.trim();
-            if(!val) return;
-            addMsg("You", val);
+            if(!val || aiBusy) return;
             input.value = "";
-            aiBrain(val);
+            addMsg("Ты", val, "text-pink-500");
+            aiRequest(val);
         }
 
-        function aiAutopilot() {
-            if(!isSpeaking) {
-                const thoughts = [
-                    "Обожаю эту станцию!",
-                    "Хм, в чате сегодня тихо. Расскажите что-нибудь?",
-                    "Я тут подумала... а что если мы все в симуляции?",
-                    "Может сменим музыку? Я немного устала от этого ритма."
-                ];
-                aiBrain(thoughts[Math.floor(Math.random()*thoughts.length)], true);
+        function autoTalk() {
+            if(!isSpeaking && !aiBusy) {
+                const ideas = ["Расскажи забавный факт про музыку", "Поздоровайся с новыми зрителями", "Прокомментируй текущую атмосферу"];
+                aiRequest(ideas[Math.floor(Math.random()*ideas.length)], true);
             }
         }
 
-        function startTimer() {
+        function simulateChat() {
+            const users = ["Cyber_Bob", "Miku_Fan", "Dark_Soul", "Liza_Stream"];
+            const msgs = ["Крутой стрим!", "Ого, привет!", "Что за трек?", "Люблю этот фон", "Лайк поставил!"];
+            addMsg(users[Math.floor(Math.random()*users.length)], msgs[Math.floor(Math.random()*msgs.length)]);
+        }
+
+        function startUptime() {
             let s = 0;
             setInterval(() => {
                 s++;
-                const m = Math.floor(s/60).toString().padStart(2, '0');
-                const sc = (s%60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `${m}:${sc}`;
+                const h = Math.floor(s/3600).toString().padStart(2,'0');
+                const m = Math.floor((s%3600)/60).toString().padStart(2,'0');
+                const sc = (s%60).toString().padStart(2,'0');
+                document.getElementById('uptime').innerText = `${h}:${m}:${sc}`;
+                
+                if(s % 5 === 0) {
+                    const vc = 1800 + Math.floor(Math.random()*150);
+                    document.getElementById('viewer-count').innerText = vc.toLocaleString();
+                }
             }, 1000);
         }
 
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleUser(); });
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     </script>
 </body>
 </html>
