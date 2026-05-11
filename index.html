@@ -3,213 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI Neuro Streamer Pro</title>
+    <title>AI VTuber VK Edition</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Montserrat:wght@300;600;800&display=swap');
         
-        :root { --accent: #00f2ff; --bg-dark: rgba(10, 10, 18, 0.85); }
+        :root { --accent: #00f2ff; }
         body { background: #000; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
 
-        /* ФОН КОМНАТЫ */
+        /* ФОН ИЗ ТВОИХ ФАЙЛОВ */
         #room-bg {
             position: absolute; inset: 0;
             background-image: url('uploaded:1000122230.jpg-f341b961-4115-4041-b8bc-3e70cc94bfb8');
             background-size: cover; background-position: center;
-            filter: brightness(0.6) contrast(1.1); z-index: 1;
+            filter: brightness(0.6); z-index: 1;
         }
 
-        /* ЛОГОТИП ГРУППЫ */
-        #brand-logo {
+        /* ЛОГОТИП */
+        #group-logo {
             position: absolute; top: 15px; left: 15px;
-            width: 55px; height: 55px;
+            width: 60px; height: 60px;
             background-image: url('uploaded:1000122084.png-5b19d047-9013-454e-8fb6-40c30781f53f');
             background-size: contain; background-repeat: no-repeat;
             z-index: 150; filter: drop-shadow(0 0 10px var(--accent));
         }
 
-        /* ПЕРСОНАЖ */
-        .stage {
+        /* АВАТАР - КАРТИНКА ПЕРСОНАЖА */
+        .avatar-container {
             position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 450px; height: 80%;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            z-index: 10; pointer-events: none;
+            width: 100%; max-width: 450px; height: 85%;
+            z-index: 10; display: flex; align-items: flex-end; justify-content: center;
+            pointer-events: none;
         }
 
-        .avatar-container { animation: breathe 4s ease-in-out infinite; transform-origin: bottom center; }
-        @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
-        .head {
-            width: 115px; height: 145px; background: #ffe4d5; border-radius: 55px 55px 70px 70px;
-            position: relative; box-shadow: 0 8px 25px rgba(0,0,0,0.4); z-index: 5;
+        #vtuber-img {
+            height: 100%; object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(0,242,255,0.3));
+            animation: float 4s ease-in-out infinite;
         }
-        .hair {
-            position: absolute; top: -12px; left: -8px; width: 130px; height: 115px;
-            background: linear-gradient(180deg, var(--accent), #b026ff); border-radius: 65px 65px 25px 25px;
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.02); }
         }
-        .eye { width: 22px; height: 22px; background: #fff; border-radius: 50%; position: relative; animation: blink 5s infinite; }
-        .eye::after { content: ''; position: absolute; top: 6px; left: 6px; width: 10px; height: 10px; background: #111; border-radius: 50%; }
-        @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
 
-        .mouth {
-            position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-            width: 20px; height: 6px; background: #ff4081; border-radius: 10px; transition: 0.1s;
+        /* СЛОЙ ДЛЯ ГОВОРЯЩЕГО РТА (ПРИМЕРНОЕ ПОЗИЦИОНИРОВАНИЕ) */
+        #mouth-sync {
+            position: absolute; bottom: 60%; left: 50%;
+            transform: translateX(-50%);
+            width: 30px; height: 10px;
+            background: #ff4081; border-radius: 50%;
+            display: none; z-index: 11;
         }
-        .talking .mouth { animation: speak-anim 0.1s infinite alternate; }
-        @keyframes speak-anim { from { height: 4px; } to { height: 16px; border-radius: 40%; } }
+        .talking #mouth-sync {
+            display: block;
+            animation: mouth-move 0.12s infinite alternate;
+        }
+        @keyframes mouth-move { from { height: 4px; } to { height: 18px; } }
 
-        .body-part { width: 140px; height: 200px; background: #1a1a2e; border-radius: 45px 45px 55px 55px; margin-top: -25px; border: 2px solid #333; }
-
-        /* ИНТЕРФЕЙС - ПОДНЯЛИ ВЫШЕ */
+        /* ИНТЕРФЕЙС */
         .hud { position: absolute; inset: 0; z-index: 100; pointer-events: none; padding: 20px; display: flex; flex-direction: column; }
-        .glass { background: var(--bg-dark); backdrop-filter: blur(12px); border: 1px solid rgba(0,242,255,0.2); border-radius: 16px; pointer-events: auto; }
+        .glass { background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); border: 1px solid rgba(0,242,255,0.2); border-radius: 20px; pointer-events: auto; }
         
-        /* ЧАТ - ТЕПЕРЬ СВЕРХУ СБОКУ */
-        #chat-container {
-            position: absolute; top: 80px; right: 20px;
-            width: 240px; max-height: 250px;
-            overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
-            scrollbar-width: none; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        #chat-flow {
+            position: absolute; top: 100px; right: 20px;
+            width: 260px; max-height: 250px;
+            overflow-y: auto; scrollbar-width: none;
+            display: flex; flex-direction: column; gap: 8px;
         }
-        .chat-msg { font-size: 11px; padding: 8px 12px; border-radius: 12px; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .msg { font-size: 11px; padding: 10px; border-radius: 14px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-        #start-overlay { background: #000; z-index: 1000; transition: 0.5s; cursor: pointer; }
+        #start-overlay { background: #000; z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="start-overlay" class="fixed inset-0 flex flex-col items-center justify-center" onclick="startStream()">
-        <div class="relative w-24 h-24 mb-6">
-            <div class="absolute inset-0 border-2 border-cyan-500 rounded-full animate-ping opacity-20"></div>
-            <div class="absolute inset-0 border border-cyan-500 rounded-full flex items-center justify-center">
-                <span class="text-cyan-500 font-black text-[10px] tracking-widest uppercase">Go Live</span>
+    <div id="start-overlay" class="fixed inset-0" onclick="startApp()">
+        <div class="text-center">
+            <div class="w-24 h-24 border-2 border-cyan-500 rounded-full animate-ping mb-6 flex items-center justify-center">
+                <span class="text-cyan-500 font-black text-xs uppercase tracking-tighter">Live</span>
             </div>
+            <div class="text-[9px] tracking-[6px] text-white/40 uppercase">Подключение к VK Bridge</div>
         </div>
-        <div class="text-[8px] uppercase tracking-[6px] text-white/30">Connect to neural host</div>
     </div>
 
     <div id="room-bg"></div>
-    <div id="brand-logo"></div>
+    <div id="group-logo"></div>
 
-    <div class="stage">
-        <div id="character-rig" class="avatar-container">
-            <div class="head">
-                <div class="hair"></div>
-                <div class="flex justify-around mt-16 px-4"><div class="eye"></div><div class="eye"></div></div>
-                <div id="mouth" class="mouth"></div>
-            </div>
-            <div class="body-part"></div>
-        </div>
+    <div class="avatar-container" id="avatar-box">
+        <!-- АВАТАР - ПОСТАВИЛ ОДИН ИЗ ТВОИХ ФАЙЛОВ КАК МОДЕЛЬ -->
+        <img id="vtuber-img" src="uploaded:1000122090.png-d8b4a516-b9d0-4c43-81fa-f7fdd3c383e3" alt="VTuber">
+        <div id="mouth-sync"></div>
     </div>
 
     <div class="hud">
         <div class="flex justify-between items-start pointer-events-auto">
             <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-2">
-                    <div class="bg-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">Live</div>
-                    <div class="glass px-3 py-1 text-[10px] text-cyan-400 font-bold" id="uptime">00:00:00</div>
+                    <div class="bg-red-600 px-3 py-1 rounded text-[10px] font-black uppercase">Live</div>
+                    <div class="glass px-3 py-1 text-[11px] text-cyan-400 font-bold" id="uptime">00:00:00</div>
                 </div>
-                <div class="text-[10px] text-white/40 uppercase">Радио: <span id="radio-status" class="text-white/80">On</span></div>
             </div>
-            <div class="glass p-3 flex flex-col items-end">
-                <div class="text-[8px] text-white/40 uppercase">Зрители</div>
-                <div class="text-[14px] font-black text-cyan-500" id="viewer-count">1,842</div>
+            <div class="glass px-4 py-2 text-[10px] font-bold">
+                <span class="text-white/40">Зрители:</span> <span id="v-count">2,109</span>
             </div>
         </div>
 
-        <div id="chat-container"></div>
+        <div id="chat-flow"></div>
 
         <div class="mt-auto flex flex-col gap-3 pointer-events-auto">
             <div class="glass p-3 flex items-center gap-3">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <div class="text-[10px] font-bold truncate flex-1" id="track-info">Загрузка музыки...</div>
-                <button onclick="nextStation()" class="bg-white/10 p-2 rounded-lg hover:bg-white/20 transition">
+                <div class="text-[10px] font-bold text-cyan-500">Radio:</div>
+                <div class="text-[10px] truncate flex-1" id="track">Lo-Fi Cyberpunk</div>
+                <button onclick="changeTrack()" class="bg-white/10 p-2 rounded-lg hover:bg-white/20">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </button>
             </div>
             <div class="flex gap-2">
-                <input id="chat-input" type="text" class="glass flex-1 bg-transparent border-none outline-none px-5 py-4 text-sm" placeholder="Спроси её о чем-нибудь...">
-                <button onclick="sendMessage()" class="bg-cyan-500 text-black px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-[0_0_20px_rgba(6,182,212,0.4)]">Send</button>
+                <input id="chat-input" type="text" class="glass flex-1 bg-transparent border-none outline-none px-6 py-4 text-sm" placeholder="Напиши своей ИИ-Тян...">
+                <button onclick="handleSend()" class="bg-cyan-500 text-black px-8 py-4 rounded-2xl font-black text-[10px] uppercase">Send</button>
             </div>
         </div>
     </div>
 
-    <audio id="radio-player" crossorigin="anonymous" loop></audio>
+    <audio id="player" loop crossorigin="anonymous"></audio>
 
     <script>
         const stations = [
             { name: "Synthwave Night", url: "https://stream.zeno.fm/0r0xa792kwzuv" },
-            { name: "Lofi Beats", url: "https://stream.zeno.fm/f9scrt81638uv" },
-            { name: "Cyber Radio", url: "https://icecast.skyrock.net/s/natio_mp3_128k" }
+            { name: "Miku Chill", url: "https://stream.zeno.fm/f9scrt81638uv" }
         ];
 
         let curStation = 0;
+        let vkReady = false;
         let isSpeaking = false;
-        let aiBusy = false;
-        const player = document.getElementById('radio-player');
-        const chat = document.getElementById('chat-container');
+        const player = document.getElementById('player');
+        const chat = document.getElementById('chat-flow');
         const input = document.getElementById('chat-input');
-        const mouth = document.getElementById('mouth');
 
-        async function startStream() {
-            try { vkBridge.send("VKWebAppInit"); } catch(e) {}
-            document.getElementById('start-overlay').style.opacity = '0';
-            setTimeout(() => document.getElementById('start-overlay').style.display = 'none', 500);
+        // ИНИЦИАЛИЗАЦИЯ VK BRIDGE
+        if (window.vkBridge) {
+            vkBridge.send('VKWebAppInit')
+                .then(() => { vkReady = true; console.log('VK Init OK'); })
+                .catch(() => { vkReady = true; });
+        } else { vkReady = true; }
+
+        function startApp() {
+            if (!vkReady) return;
+            document.getElementById('start-overlay').style.display = 'none';
             
-            nextStation(0);
-            startUptime();
-            addMsg("System", "Нейросеть подключена. Приятного стрима!", "text-cyan-400");
+            if (window.vkBridge) {
+                vkBridge.send('VKWebAppSetViewSettings', { status_bar_style: 'light' }).catch(()=>{});
+            }
+
+            changeTrack(0);
+            startTimer();
+            addMsg("System", "Нейросеть активна. Эфир запущен!", "text-cyan-400");
             
-            // Авто-мысли стримерши
-            setInterval(autoTalk, 25000);
-            setInterval(simulateChat, 12000);
+            setInterval(autoPilot, 25000);
         }
 
-        function nextStation(idx = -1) {
+        function changeTrack(idx = -1) {
             curStation = idx === -1 ? (curStation + 1) % stations.length : idx;
             player.src = stations[curStation].url;
-            player.play().catch(() => console.log("Audio play blocked"));
-            document.getElementById('track-info').innerText = stations[curStation].name;
+            player.play().catch(()=>{});
+            document.getElementById('track').innerText = stations[curStation].name;
             player.volume = 0.2;
         }
 
         function addMsg(user, text, colorClass = "text-white/80") {
             const div = document.createElement('div');
-            div.className = `chat-msg glass`;
+            div.className = `msg glass`;
             div.innerHTML = `<b class="${colorClass} mr-2">${user}:</b> ${text}`;
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
-            if(chat.children.length > 20) chat.removeChild(chat.firstChild);
+            if(chat.children.length > 15) chat.removeChild(chat.firstChild);
         }
 
-        // Продвинутая функция запроса к ИИ с обработкой ошибок
-        async function aiRequest(prompt, isAuto = false) {
-            if (aiBusy && !isAuto) return;
-            aiBusy = true;
-
-            const sys = `Ты - популярная ИИ-стримерша. Твой стиль: дружелюбный, немного дерзкий, молодежный. 
-            Короткие ответы до 10 слов. Ты любишь музыку и общение. Если спрашивают про музыку - скажи, что трек крутой.`;
-
-            let success = false;
-            let retryCount = 0;
-
-            while (!success && retryCount < 3) {
-                try {
-                    const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(sys)}&seed=${Math.random()}`);
-                    if (!response.ok) throw new Error("API Limit");
-                    
-                    const reply = await response.text();
-                    addMsg("AI_Girl", reply, "text-cyan-400 font-bold");
-                    speak(reply);
-                    success = true;
-                } catch (e) {
-                    retryCount++;
-                    await new Promise(r => setTimeout(r, 1000 * retryCount));
-                }
-            }
-            aiBusy = false;
+        async function talkToAI(prompt, isAuto = false) {
+            if(isSpeaking && !isAuto) return;
+            
+            const sys = `Ты - популярная ИИ-стримерша. Ответы до 10 слов. Ты любишь чат и музыку.`;
+            
+            try {
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(sys)}&seed=${Math.random()}`);
+                const txt = await res.text();
+                addMsg("ИИ-Тян", txt, "text-cyan-400 font-bold");
+                speak(txt);
+            } catch(e) { console.log("AI Error"); }
         }
 
         function speak(text) {
@@ -218,33 +201,26 @@
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'ru-RU';
             utter.pitch = 1.4;
-            utter.onstart = () => { isSpeaking = true; document.getElementById('character-rig').classList.add('talking'); };
-            utter.onend = () => { isSpeaking = false; document.getElementById('character-rig').classList.remove('talking'); };
+            utter.onstart = () => { isSpeaking = true; document.getElementById('avatar-box').classList.add('talking'); };
+            utter.onend = () => { isSpeaking = false; document.getElementById('avatar-box').classList.remove('talking'); };
             window.speechSynthesis.speak(utter);
         }
 
-        function sendMessage() {
-            const val = input.value.trim();
-            if(!val || aiBusy) return;
+        function handleSend() {
+            const v = input.value.trim();
+            if(!v) return;
             input.value = "";
-            addMsg("Ты", val, "text-pink-500");
-            aiRequest(val);
+            addMsg("Ты", v, "text-pink-500");
+            talkToAI(v);
         }
 
-        function autoTalk() {
-            if(!isSpeaking && !aiBusy) {
-                const ideas = ["Расскажи забавный факт про музыку", "Поздоровайся с новыми зрителями", "Прокомментируй текущую атмосферу"];
-                aiRequest(ideas[Math.floor(Math.random()*ideas.length)], true);
+        function autoPilot() {
+            if(!isSpeaking) {
+                talkToAI("Расскажи забавный факт или поздоровайся с новыми зрителями", true);
             }
         }
 
-        function simulateChat() {
-            const users = ["Cyber_Bob", "Miku_Fan", "Dark_Soul", "Liza_Stream"];
-            const msgs = ["Крутой стрим!", "Ого, привет!", "Что за трек?", "Люблю этот фон", "Лайк поставил!"];
-            addMsg(users[Math.floor(Math.random()*users.length)], msgs[Math.floor(Math.random()*msgs.length)]);
-        }
-
-        function startUptime() {
+        function startTimer() {
             let s = 0;
             setInterval(() => {
                 s++;
@@ -254,13 +230,13 @@
                 document.getElementById('uptime').innerText = `${h}:${m}:${sc}`;
                 
                 if(s % 5 === 0) {
-                    const vc = 1800 + Math.floor(Math.random()*150);
-                    document.getElementById('viewer-count').innerText = vc.toLocaleString();
+                    const vc = 2100 + Math.floor(Math.random()*100);
+                    document.getElementById('v-count').innerText = vc.toLocaleString();
                 }
             }, 1000);
         }
 
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
     </script>
 </body>
 </html>
