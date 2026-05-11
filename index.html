@@ -3,345 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI VTuber Supreme</title>
+    <title>AI Streamer Fast</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Montserrat:wght@400;700&display=swap');
         
-        body { background: #050508; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        body { background: #0a0a12; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
 
-        /* SCENE SETUP */
-        #stage {
+        /* ПОСТОЯННЫЙ ФОН КОМНАТЫ */
+        #room {
             position: absolute; inset: 0;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050508 100%);
-            display: flex; justify-content: center; align-items: flex-end;
-            perspective: 1000px;
-        }
-
-        /* NEON LIGHTS */
-        .neon-tube {
-            position: absolute; width: 2px; height: 300px;
-            background: #00f2ff; box-shadow: 0 0 20px #00f2ff, 0 0 40px #00f2ff;
-            opacity: 0.3; filter: blur(1px);
-        }
-        .neon-left { left: 10%; top: 20%; transform: rotate(-10deg); animation: flicker 3s infinite; }
-        .neon-right { right: 10%; top: 15%; transform: rotate(15deg); background: #ff00aa; box-shadow: 0 0 20px #ff00aa; animation: flicker 4s infinite reverse; }
-
-        @keyframes flicker {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-            95% { opacity: 0.3; }
-            97% { opacity: 0.8; }
-        }
-
-        /* THE CHAIR & CHARACTER RIG */
-        .rig-container {
-            position: relative; width: 300px; height: 500px;
-            display: flex; flex-direction: column; align-items: center;
-            transform-origin: bottom center;
-            animation: globalSway 6s ease-in-out infinite;
-        }
-
-        @keyframes globalSway {
-            0%, 100% { transform: rotate(-1deg) translateY(0); }
-            50% { transform: rotate(1deg) translateY(-10px); }
-        }
-
-        /* THE CHAIR */
-        .chair {
-            position: absolute; bottom: 0; width: 240px; height: 380px;
-            background: #111; border: 2px solid #222; border-radius: 40px 40px 20px 20px;
-            box-shadow: inset 0 0 30px rgba(0,242,255,0.1), 0 20px 50px rgba(0,0,0,0.5);
+            background: radial-gradient(circle at 50% 50%, #1a1033 0%, #07070c 100%);
             z-index: 1;
         }
-        .chair::after {
-            content: ''; position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            width: 80%; height: 60px; background: rgba(0,242,255,0.05); border-radius: 30px;
+        #room::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.1;
         }
 
-        /* CHARACTER COMPONENTS */
-        .character-body {
-            position: relative; z-index: 10; margin-top: 50px;
-            display: flex; flex-direction: column; align-items: center;
+        /* ПЕРСОНАЖ И КРЕСЛО */
+        .stage {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 320px; height: 500px; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            animation: breathe 5s ease-in-out infinite;
         }
 
-        .avatar-head {
-            width: 130px; height: 160px;
-            background: #ffe4d5; border-radius: 60px 60px 70px 70px;
-            position: relative; transition: transform 0.2s ease;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            z-index: 15;
+        @keyframes breathe {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-8px); }
         }
 
-        /* HAIR */
-        .avatar-hair {
-            position: absolute; top: -20px; left: -10px; width: 150px; height: 120px;
-            background: linear-gradient(180deg, #00f2ff, #7000ff);
-            border-radius: 80px 80px 20px 20px; z-index: 5;
-        }
-        .avatar-hair::after {
-            content: ''; position: absolute; bottom: -40px; left: 0; right: 0;
-            height: 60px; background: inherit; border-radius: 0 0 40px 40px;
+        /* КРЕСЛО */
+        .chair {
+            position: absolute; bottom: 20px; width: 240px; height: 350px;
+            background: #111; border: 2px solid #222; border-radius: 40px 40px 20px 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 5;
         }
 
-        /* FACE FEATURES */
-        .eyes-box {
-            position: absolute; top: 70px; width: 100%;
-            display: flex; justify-content: space-around; padding: 0 20px;
-        }
-        .eye {
-            width: 28px; height: 35px; background: #fff; border-radius: 50%;
-            position: relative; overflow: hidden; animation: blink 4s infinite;
-        }
-        .eye-pupil {
-            position: absolute; top: 10px; left: 6px; width: 16px; height: 20px;
-            background: #00f2ff; border-radius: 50%;
-            transition: transform 0.1s ease;
-        }
-        .eye-pupil::after { content: ''; position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: #fff; border-radius: 50%; }
-
-        @keyframes blink {
-            0%, 96%, 100% { transform: scaleY(1); }
-            98% { transform: scaleY(0.1); }
-        }
-
-        .avatar-mouth {
-            position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
-            width: 24px; height: 8px; background: #ff4081; border-radius: 20px;
-            transition: all 0.1s ease;
-        }
-
-        /* TALKING ANIMATION */
-        .talking .avatar-mouth {
-            animation: lipSync 0.12s infinite alternate;
-            background: #ff0055;
-        }
-        @keyframes lipSync {
-            from { height: 4px; border-radius: 20px; }
-            to { height: 20px; border-radius: 50%; }
-        }
-
-        /* CLOTHES */
-        .avatar-torso {
-            width: 160px; height: 180px; background: #1a1a2e;
-            border-radius: 40px 40px 60px 60px; margin-top: -25px;
-            border: 2px solid #333; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* HUD */
-        .hud { position: absolute; inset: 0; z-index: 100; pointer-events: none; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; }
-        .glass { background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); border: 1px solid rgba(0,242,255,0.2); border-radius: 15px; pointer-events: auto; }
+        /* ТЕЛО */
+        .avatar { position: relative; z-index: 15; display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
         
-        #chat-log { max-height: 200px; overflow-y: auto; scroll-behavior: smooth; }
-        .msg { font-size: 11px; margin-bottom: 6px; animation: msgIn 0.3s ease-out; }
-        @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* MICROPHONE */
-        .mic-rig {
-            position: absolute; bottom: 100px; right: -40px;
-            z-index: 50; animation: micBob 3s ease-in-out infinite;
+        .head {
+            width: 110px; height: 140px; background: #ffe4d5; border-radius: 55px 55px 65px 65px;
+            position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        @keyframes micBob { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-10px) rotate(-10deg); } }
+        .hair {
+            position: absolute; top: -15px; left: -10px; width: 130px; height: 100px;
+            background: linear-gradient(180deg, #00f2ff, #7000ff); border-radius: 65px 65px 20px 20px;
+        }
+        .eyes { position: absolute; top: 65px; width: 100%; display: flex; justify-content: space-around; padding: 0 20px; }
+        .eye { width: 22px; height: 22px; background: #fff; border-radius: 50%; position: relative; animation: blink 4s infinite; }
+        .eye::after { content: ''; position: absolute; top: 6px; left: 6px; width: 10px; height: 10px; background: #111; border-radius: 50%; }
+
+        @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
+
+        .mouth {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 18px; height: 6px; background: #ff4081; border-radius: 10px; transition: 0.1s;
+        }
+        .talking .mouth { animation: speak 0.15s infinite alternate; }
+        @keyframes speak { from { height: 4px; } to { height: 14px; border-radius: 50%; } }
+
+        .torso { width: 140px; height: 150px; background: #1a1a2e; border-radius: 40px 40px 50px 50px; margin-top: -20px; border: 2px solid #333; }
+
+        /* ИНТЕРФЕЙС */
+        .hud { position: absolute; inset: 0; z-index: 100; pointer-events: none; padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
+        .glass { background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; pointer-events: auto; }
+        
+        #chat { max-height: 160px; overflow-y: auto; }
+        .msg { font-size: 11px; margin-bottom: 5px; animation: msgIn 0.2s ease-out; }
+        @keyframes msgIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* ЭКРАН СТАРТА */
+        #gate { background: #0a0a12; cursor: pointer; transition: 0.5s; }
     </style>
 </head>
 <body>
 
-    <div id="gate" class="fixed inset-0 bg-[#050508] z-[1000] flex flex-col items-center justify-center cursor-pointer" onclick="initStream()">
-        <div class="relative w-32 h-32 mb-8">
-            <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full animate-ping"></div>
-            <div class="absolute inset-2 border-2 border-cyan-400 rounded-full flex items-center justify-center font-black text-cyan-400">GO LIVE</div>
+    <div id="gate" class="fixed inset-0 z-[1000] flex flex-col items-center justify-center" onclick="start()">
+        <div class="w-20 h-20 bg-cyan-500 rounded-full flex items-center justify-center animate-pulse shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+            <div class="text-black font-black text-xs uppercase">Live</div>
         </div>
-        <div class="text-[10px] tracking-[6px] text-white/40 uppercase">Подключение к нейросети...</div>
+        <div class="mt-6 text-[10px] text-white/40 uppercase tracking-[4px]">Нажми чтобы начать</div>
     </div>
 
-    <div id="stage">
-        <div class="neon-tube neon-left"></div>
-        <div class="neon-tube neon-right"></div>
+    <div id="room"></div>
 
-        <div class="rig-container">
-            <!-- THE CHAIR -->
-            <div class="chair"></div>
-
-            <!-- THE CHARACTER -->
-            <div id="character" class="character-body">
-                <div class="avatar-head" id="head-rig">
-                    <div class="avatar-hair"></div>
-                    <div class="eyes-box">
-                        <div class="eye"><div class="eye-pupil"></div></div>
-                        <div class="eye"><div class="eye-pupil"></div></div>
-                    </div>
-                    <div class="avatar-mouth"></div>
+    <div class="stage" id="character-box">
+        <div class="avatar">
+            <div class="head">
+                <div class="hair"></div>
+                <div class="eyes">
+                    <div class="eye"></div>
+                    <div class="eye"></div>
                 </div>
-                <div class="avatar-torso"></div>
+                <div id="mouth" class="mouth"></div>
             </div>
-
-            <!-- MICROPHONE -->
-            <div class="mic-rig">
-                <div class="w-10 h-16 bg-[#222] border-2 border-[#444] rounded-full relative">
-                    <div class="absolute inset-2 bg-cyan-500/10 rounded-full flex items-center justify-center">
-                        <div class="w-1 h-8 bg-cyan-500/30 rounded-full"></div>
-                    </div>
-                </div>
-                <div class="w-2 h-20 bg-[#333] mx-auto -mt-2 rounded-full"></div>
-            </div>
+            <div class="torso"></div>
         </div>
+        <div class="chair"></div>
     </div>
 
     <div class="hud">
-        <!-- TOP STATS -->
         <div class="flex justify-between items-start pointer-events-auto">
             <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <div class="bg-red-600 px-3 py-1 rounded text-[10px] font-black animate-pulse">LIVE</div>
-                    <div class="glass px-3 py-1 text-[10px] font-bold text-cyan-400" id="clock">00:00:00</div>
-                </div>
-                <div class="text-[9px] text-white/60 font-bold uppercase tracking-widest">Viewers: <span id="vc">2,841</span></div>
+                <div class="bg-red-600 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter">Live</div>
+                <div class="glass px-3 py-1 text-[10px] font-bold text-cyan-400" id="timer">00:00:00</div>
             </div>
-            <div class="glass p-3 text-right">
-                <div class="text-[8px] text-white/40 uppercase">Last Sub</div>
-                <div class="text-[11px] font-black text-pink-500" id="last-sub">Gamer_X</div>
+            <div class="glass px-4 py-2 text-[10px] font-bold uppercase">
+                <span class="text-white/40 mr-2">Зрители:</span> <span id="vcount">1,402</span>
             </div>
         </div>
 
-        <!-- CHAT BOX -->
-        <div class="flex flex-col gap-4">
-            <div id="chat-log" class="glass p-4 pointer-events-auto">
-                <div class="msg text-white/40 italic">Канал инициализирован...</div>
+        <div class="flex flex-col gap-3">
+            <div id="chat" class="glass p-3">
+                <div class="msg text-white/30 italic">Чат активен...</div>
             </div>
             <div class="glass p-2 flex gap-2 pointer-events-auto">
-                <input id="chat-in" type="text" class="bg-transparent border-none outline-none flex-1 px-4 text-sm font-medium" placeholder="Напиши ИИ-тян...">
-                <button onclick="sendUserMsg()" class="bg-cyan-500 text-black px-6 py-3 rounded-xl font-black text-[10px] uppercase active:scale-90 transition-transform">Send</button>
+                <input id="inp" type="text" class="bg-transparent border-none outline-none flex-1 px-4 text-sm" placeholder="Напиши что-нибудь...">
+                <button onclick="sendMsg()" class="bg-cyan-500 text-black px-6 py-2 rounded-xl font-black text-[10px] uppercase">Send</button>
             </div>
         </div>
     </div>
 
-    <audio id="stream-music" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
+    <audio id="music" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
-        const chatLog = document.getElementById('chat-log');
-        const chatIn = document.getElementById('chat-in');
-        const character = document.getElementById('character');
-        const headRig = document.getElementById('head-rig');
-        const music = document.getElementById('stream-music');
-        
-        let isSpeaking = false;
-        let lastAction = Date.now();
+        const chat = document.getElementById('chat');
+        const inp = document.getElementById('inp');
+        const mouth = document.getElementById('mouth');
+        const music = document.getElementById('music');
+        let talking = false;
 
-        async function initStream() {
-            try { await vkBridge.send("VKWebAppInit"); } catch(e) {}
-            document.getElementById('gate').style.display = 'none';
+        function start() {
+            try { vkBridge.send("VKWebAppInit"); } catch(e) {}
+            document.getElementById('gate').style.opacity = '0';
+            setTimeout(() => document.getElementById('gate').style.display = 'none', 500);
             
             music.play();
-            music.volume = 0.2;
+            music.volume = 0.1;
             
-            startClock();
-            addMsg("SYSTEM", "AI_VTUBER_READY. ПРИВЕТ, МИР!", false);
+            startTimer();
+            addMsg("Система", "Эфир запущен успешно!", true);
             
-            // Auto loops
-            setInterval(autoChatter, 18000);
-            setInterval(simulateEngagement, 25000);
-            
-            // Eye tracking simulation
             setInterval(() => {
-                const pupils = document.querySelectorAll('.eye-pupil');
-                const x = (Math.random() * 10 - 5);
-                const y = (Math.random() * 10 - 5);
-                pupils.forEach(p => p.style.transform = `translate(${x}px, ${y}px)`);
-            }, 3000);
-        }
-
-        function startClock() {
-            let s = 0;
-            setInterval(() => {
-                s++;
-                const h = Math.floor(s/3600).toString().padStart(2,'0');
-                const m = Math.floor((s%3600)/60).toString().padStart(2,'0');
-                const sec = (s%60).toString().padStart(2,'0');
-                document.getElementById('clock').innerText = `${h}:${m}:${sec}`;
-            }, 1000);
+                if(!talking && Math.random() > 0.7) {
+                    aiSpeak("Ребята, не забывайте ставить лайки и писать в чат!", true);
+                }
+            }, 25000);
         }
 
         function addMsg(user, text, isBot = false) {
-            const div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `<b class="${isBot ? 'text-cyan-400' : 'text-pink-400'} uppercase mr-1">${user}:</b> ${text}`;
-            chatLog.appendChild(div);
-            chatLog.scrollTop = chatLog.scrollHeight;
+            const d = document.createElement('div');
+            d.className = 'msg';
+            d.innerHTML = `<b class="${isBot ? 'text-cyan-400' : 'text-pink-500'} uppercase mr-1">${user}:</b> ${text}`;
+            chat.appendChild(d);
+            chat.scrollTop = chat.scrollHeight;
         }
 
         function speak(text) {
             if (!window.speechSynthesis) return;
             window.speechSynthesis.cancel();
-            
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'ru-RU';
-            utter.pitch = 1.4;
-            utter.rate = 1.1;
-
-            utter.onstart = () => {
-                isSpeaking = true;
-                character.classList.add('talking');
-                headRig.style.transform = "rotate(5deg) scale(1.05)";
-                music.volume = 0.05;
-            };
-            utter.onend = () => {
-                isSpeaking = false;
-                character.classList.remove('talking');
-                headRig.style.transform = "rotate(0) scale(1)";
-                music.volume = 0.2;
-            };
-            
-            window.speechSynthesis.speak(utter);
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'ru-RU';
+            u.pitch = 1.4;
+            u.onstart = () => { talking = true; document.getElementById('character-box').classList.add('talking'); };
+            u.onend = () => { talking = false; document.getElementById('character-box').classList.remove('talking'); };
+            window.speechSynthesis.speak(u);
         }
 
-        async function aiMind(prompt, isAuto = false) {
+        async function aiSpeak(prompt, isAuto = false) {
             try {
-                const system = isAuto ? 
-                    "Ты цифровая стримерша. Скажи что-то короткое чату (до 10 слов). Шути, будь милой. По-русски." :
-                    "Ты стримерша. Ответь пользователю дерзко или мило. До 10 слов. По-русски.";
+                const sys = isAuto ? "Ты стримерша. Скажи короткую фразу чату. До 7 слов." : "Ты стримерша. Ответь коротко. До 7 слов.";
+                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(sys)}`);
+                const txt = await res.text();
+                addMsg("ИИ-Тян", txt, true);
+                speak(txt);
+            } catch(e) {}
+        }
+
+        function sendMsg() {
+            const v = inp.value.trim();
+            if(!v || talking) return;
+            inp.value = '';
+            addMsg("Ты", v);
+            aiSpeak(v);
+        }
+
+        function startTimer() {
+            let s = 0;
+            setInterval(() => {
+                s++;
+                const m = Math.floor((s%3600)/60).toString().padStart(2,'0');
+                const sc = (s%60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `00:${m}:${sc}`;
                 
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(system)}`);
-                const reply = await res.text();
-                
-                addMsg("AI_GIRL", reply, true);
-                speak(reply);
-                lastAction = Date.now();
-            } catch(e) { console.error(e); }
+                if(s % 10 === 0) {
+                    const vc = 1400 + Math.floor(Math.random()*100);
+                    document.getElementById('vcount').innerText = vc.toLocaleString();
+                }
+            }, 1000);
         }
 
-        function sendUserMsg() {
-            const val = chatIn.value.trim();
-            if (!val || isSpeaking) return;
-            chatIn.value = '';
-            addMsg("USER_X", val);
-            aiMind(val, false);
-        }
-
-        function autoChatter() {
-            if (Date.now() - lastAction > 20000 && !isSpeaking) {
-                aiMind("Почему вы такие тихие сегодня?", true);
-            }
-        }
-
-        function simulateEngagement() {
-            const actions = ["подписался!", "задонатил 500₽!", "зашел в чат", "кинул сердечко"];
-            const users = ["CyberPunk", "LoliFan", "Gamer99", "MikuLuv"];
-            const u = users[Math.floor(Math.random()*users.length)];
-            const a = actions[Math.floor(Math.random()*actions.length)];
-            
-            addMsg("SYSTEM", `${u} ${a}`);
-            if(a.includes("задонатил") || a.includes("подписался")) {
-                document.getElementById('last-sub').innerText = u;
-                setTimeout(() => speak(`Ой, ${u}, спасибо за поддержку!`), 1000);
-            }
-            
-            const v = (parseInt(document.getElementById('vc').innerText.replace(',','')) + (Math.floor(Math.random()*20)-10));
-            document.getElementById('vc').innerText = v.toLocaleString();
-        }
-
-        chatIn.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendUserMsg(); });
+        inp.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     </script>
 </body>
 </html>
