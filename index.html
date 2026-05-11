@@ -3,281 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI VTuber Stream</title>
-    <!-- VK Bridge SDK -->
+    <title>AI VTuber Gemini Intelligence</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Montserrat:wght@300;700&display=swap');
         
-        :root { --accent: #00f2ff; }
-        body { 
-            background: #000; 
-            color: #fff; 
-            font-family: 'Montserrat', sans-serif; 
-            margin: 0; 
-            overflow: hidden; 
-            height: 100vh;
-            -webkit-tap-highlight-color: transparent;
+        :root { --accent: #00f2ff; --neon-pink: #ff007a; }
+        body { background: #000; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+
+        /* ФОН - ПОСЛЕДНИЙ ЗАГРУЖЕННЫЙ */
+        #room-bg {
+            position: absolute; inset: 0;
+            background-image: url('uploaded:1000122232.jpg-ad22ee37-6829-471a-8e9a-a980d46228a6');
+            background-size: cover; background-position: center;
+            filter: brightness(0.4) contrast(1.2); z-index: 1;
         }
 
-        /* Фоновое изображение комнаты */
-        #bg-layer {
-            position: absolute;
-            inset: 0;
-            background-image: url('uploaded:1000122230.jpg-f341b961-4115-4041-b8bc-3e70cc94bfb8');
-            background-size: cover;
-            background-position: center;
-            filter: brightness(0.5);
-            z-index: 1;
-        }
-
-        /* Логотип твоего канала */
-        #logo-layer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 65px;
-            height: 65px;
+        /* ЛОГОТИП ГРУППЫ */
+        #group-logo {
+            position: absolute; top: 20px; left: 20px;
+            width: 70px; height: 70px;
             background-image: url('uploaded:1000122084.png-5b19d047-9013-454e-8fb6-40c30781f53f');
-            background-size: contain;
-            background-repeat: no-repeat;
-            z-index: 50;
-            filter: drop-shadow(0 0 10px var(--accent));
+            background-size: contain; background-repeat: no-repeat;
+            z-index: 150; filter: drop-shadow(0 0 15px var(--accent));
         }
 
-        /* Персонаж (стримерша) */
-        #vtuber-container {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 500px;
-            height: 90%;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            z-index: 10;
-            pointer-events: none;
+        /* VTUBER МОДЕЛЬ */
+        .character-stage {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px; height: 95%;
+            display: flex; align-items: flex-end; justify-content: center;
+            z-index: 20; pointer-events: none;
         }
 
-        #vtuber-img {
-            height: 100%;
-            object-fit: contain;
-            animation: breathe 5s ease-in-out infinite;
-            filter: drop-shadow(0 0 30px rgba(0,242,255,0.2));
+        #vtuber-model {
+            height: 100%; object-fit: contain;
+            animation: idleMove 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 25px rgba(0,242,255,0.2));
         }
 
-        @keyframes breathe {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-15px) scale(1.01); }
+        @keyframes idleMove {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(0.5deg); }
         }
 
-        /* Анимация рта при разговоре */
-        #talking-indicator {
-            position: absolute;
-            bottom: 58%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 32px;
-            height: 12px;
-            background: #ff4081;
-            border-radius: 50%;
-            z-index: 15;
-            display: none;
-            box-shadow: 0 0 15px #ff4081;
+        /* ИНДИКАТОР РЕЧИ */
+        #mouth-fx {
+            position: absolute; bottom: 62%; left: 50%; transform: translateX(-50%);
+            width: 35px; height: 10px; background: var(--neon-pink);
+            border-radius: 50%; z-index: 25; display: none;
+            box-shadow: 0 0 20px var(--neon-pink);
         }
+        .speaking #mouth-fx { display: block; animation: speakAnim 0.12s infinite alternate; }
+        @keyframes speakAnim { from { height: 4px; } to { height: 22px; border-radius: 30%; } }
 
-        .active-speech #talking-indicator {
-            display: block;
-            animation: mouth-flap 0.15s infinite alternate;
+        /* ИНТЕРФЕЙС ЧАТА - ВЫШЕ И СБОКУ */
+        #chat-sidebar {
+            position: absolute; top: 100px; right: 20px;
+            width: 260px; max-height: 280px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+            scrollbar-width: none; z-index: 100;
         }
-
-        @keyframes mouth-flap {
-            from { height: 4px; border-radius: 50%; }
-            to { height: 18px; border-radius: 20%; }
+        .msg-bubble { 
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
+            padding: 10px 14px; font-size: 11px; animation: slideIn 0.3s ease;
         }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* Интерфейс стрима */
-        .ui-hud {
-            position: absolute;
-            inset: 0;
-            z-index: 100;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            pointer-events: none;
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ */
+        .control-panel {
+            position: absolute; bottom: 30px; left: 20px; right: 20px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 100;
         }
+        .glass { background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
 
-        .glass-panel {
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            pointer-events: auto;
-        }
-
-        #chat-window {
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            width: 250px;
-            max-height: 200px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            scrollbar-width: none;
-        }
-
-        .chat-entry {
-            font-size: 11px;
-            padding: 10px;
-            border-radius: 12px;
-            animation: popIn 0.3s ease;
-        }
-
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        /* Заставка */
-        #splash {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        #splash-screen {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.5s;
         }
     </style>
 </head>
 <body>
 
-    <!-- Нажми чтобы войти -->
-    <div id="splash" onclick="powerOn()">
-        <div class="relative w-32 h-32 mb-8">
-            <div class="absolute inset-0 border-4 border-cyan-500 rounded-full animate-ping opacity-25"></div>
-            <div class="absolute inset-0 border-2 border-cyan-500 rounded-full flex items-center justify-center">
-                <span class="text-cyan-400 font-black text-xl uppercase italic">ON</span>
-            </div>
+    <div id="splash-screen" onclick="startSystem()">
+        <div class="w-32 h-32 border-4 border-cyan-500 rounded-full flex items-center justify-center animate-pulse mb-6">
+            <span class="text-cyan-400 font-black text-2xl">START</span>
         </div>
-        <p class="text-white/40 text-[10px] tracking-[5px] uppercase animate-pulse">Нажми для входа</p>
+        <p class="text-white/30 text-[10px] tracking-[8px] uppercase">Инициализация Gemini AI</p>
     </div>
 
-    <div id="bg-layer"></div>
-    <div id="logo-layer"></div>
+    <div id="room-bg"></div>
+    <div id="group-logo"></div>
 
-    <div id="vtuber-container">
-        <!-- Используем изображение персонажа -->
-        <img id="vtuber-img" src="uploaded:1000122090.png-d8b4a516-b9d0-4c43-81fa-f7fdd3c383e3" alt="Character">
-        <div id="talking-indicator"></div>
+    <div class="character-stage" id="character-rig">
+        <img id="vtuber-model" src="uploaded:1000122090.png-d8b4a516-b9d0-4c43-81fa-f7fdd3c383e3" alt="Model">
+        <div id="mouth-fx"></div>
     </div>
 
-    <div class="ui-hud">
-        <!-- Верхняя панель -->
-        <div class="flex justify-between items-start pointer-events-auto">
+    <div id="chat-sidebar"></div>
+
+    <div class="control-panel">
+        <div class="flex justify-between items-end mb-4">
             <div class="flex flex-col gap-1">
-                <div class="bg-red-600 px-3 py-1 rounded text-[10px] font-black uppercase inline-block">Live</div>
-                <div class="text-[14px] font-bold text-white shadow-lg" id="timer">00:00:00</div>
+                <div class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase w-fit">Live</div>
+                <div class="text-xl font-bold" id="clock">00:00:00</div>
             </div>
-            <div class="glass-panel px-4 py-2 text-[11px] font-bold text-cyan-400">
-                Зрителей: <span id="viewers">2,504</span>
+            <div class="glass px-4 py-2 text-[10px] font-bold text-cyan-400">
+                Viewers: <span id="v-count">3,812</span>
             </div>
         </div>
 
-        <!-- Чат (поднят выше чтобы не закрывать её) -->
-        <div id="chat-window" class="pointer-events-none"></div>
+        <div class="glass p-4 flex items-center gap-4">
+            <div class="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <div class="text-[9px] text-white/40 uppercase mb-0.5">Now Playing</div>
+                <div class="text-[12px] font-bold truncate" id="track-name">Radio: Synthwave Stream</div>
+            </div>
+            <button onclick="changeRadio()" class="p-2 bg-white/5 rounded-xl hover:bg-white/10">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+        </div>
 
-        <!-- Управление внизу -->
-        <div class="mt-auto flex flex-col gap-4 pointer-events-auto">
-            <div class="glass-panel p-3 flex items-center gap-3">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <div class="text-[10px] truncate flex-1 text-white/80" id="current-track">Radio: Neural Beats</div>
-                <button onclick="nextRadio()" class="bg-white/10 p-2 rounded-lg">
-                    <svg class="w-4 h-4" fill="white" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                </button>
-            </div>
-            <div class="flex gap-2">
-                <input id="msg-input" type="text" class="glass-panel flex-1 bg-transparent border-none outline-none px-6 py-4 text-sm text-white" placeholder="Напиши своей ИИ-Тян...">
-                <button onclick="handleSend()" class="bg-cyan-500 text-black px-8 py-4 rounded-2xl font-black text-[11px] uppercase active:scale-95 transition">Send</button>
-            </div>
+        <div class="flex gap-2">
+            <input id="user-input" type="text" class="glass flex-1 bg-transparent border-none outline-none px-6 py-4 text-sm" placeholder="Спроси свою помощницу...">
+            <button onclick="handleMsg()" class="bg-cyan-500 text-black px-8 py-4 rounded-2xl font-black text-[11px] uppercase shadow-lg shadow-cyan-500/20 active:scale-95 transition">Talk</button>
         </div>
     </div>
 
-    <audio id="stream-audio" loop crossorigin="anonymous"></audio>
+    <audio id="audio-engine" loop crossorigin="anonymous"></audio>
 
     <script>
-        const chatWindow = document.getElementById('chat-window');
-        const msgInput = document.getElementById('msg-input');
-        const audio = document.getElementById('stream-audio');
-        const vtuberBox = document.getElementById('vtuber-container');
+        const apiKey = ""; // Экосистема сама подставит ключ
+        const chat = document.getElementById('chat-sidebar');
+        const input = document.getElementById('user-input');
+        const audio = document.getElementById('audio-engine');
+        const rig = document.getElementById('character-rig');
         
         let isSpeaking = false;
-        let aiBusy = false;
-        let startTime = Date.now();
-
+        let radioIdx = 0;
         const radios = [
             "https://stream.zeno.fm/0r0xa792kwzuv",
-            "https://stream.zeno.fm/f9scrt81638uv"
+            "https://stream.zeno.fm/f9scrt81638uv",
+            "https://icecast.skyrock.net/s/natio_mp3_128k"
         ];
-        let radioIdx = 0;
 
-        // Инициализация VK Bridge в фоновом режиме
-        try {
-            vkBridge.send('VKWebAppInit');
-        } catch(e) { console.log('VK Init skip'); }
-
-        function powerOn() {
-            // Мгновенно убираем заставку
-            document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => document.getElementById('splash').style.display = 'none', 300);
+        function startSystem() {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 500);
             
-            // Запускаем звук
-            nextRadio(0);
+            try { vkBridge.send("VKWebAppInit"); } catch(e) {}
+            
+            changeRadio(0);
             updateTimer();
+            addMsg("SYSTEM", "Я готова! Спрашивай что угодно, я помогу.", "text-cyan-400");
             
-            addMsg("SYSTEM", "Канал связи установлен. Нейросеть активна.", "text-cyan-400");
-            
-            // Автономные мысли ИИ
-            setInterval(aiAutopilot, 25000);
+            // Автономные мысли ИИ (раз в 30 сек)
+            setInterval(aiAutopilot, 30000);
         }
 
-        function nextRadio(idx = -1) {
+        function changeRadio(idx = -1) {
             radioIdx = idx === -1 ? (radioIdx + 1) % radios.length : idx;
             audio.src = radios[radioIdx];
-            audio.play().catch(() => console.log('Autoplay blocked'));
-            audio.volume = 0.2;
+            audio.play().catch(() => {});
+            audio.volume = 0.25;
+            document.getElementById('track-name').innerText = `Radio Station #${radioIdx + 1}`;
         }
 
         function addMsg(user, text, color = "text-white/70") {
             const div = document.createElement('div');
-            div.className = 'chat-entry glass-panel';
+            div.className = 'msg-bubble';
             div.innerHTML = `<b class="${color} mr-2">${user}:</b> ${text}`;
-            chatWindow.appendChild(div);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-            if(chatWindow.children.length > 8) chatWindow.removeChild(chatWindow.firstChild);
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            if(chat.children.length > 10) chat.removeChild(chat.firstChild);
         }
 
-        async function fetchAI(prompt, auto = false) {
-            if (aiBusy && !auto) return;
-            aiBusy = true;
-
-            const system = "Ты - популярная ИИ-стримерша. Ответы до 10 слов. Милая, веселая, любишь музыку.";
+        // ВЫЗОВ GEMINI 2.5 FLASH ПРЯМО ВНУТРИ
+        async function callGemini(userText) {
+            const systemPrompt = "Ты - продвинутая ИИ-ассистентка и VTuber. Тебя зовут Тян. Твой стиль: милая, умная, иногда дерзкая. Отвечай коротко (до 10 слов). Если тебя просят сменить музыку - предложи нажать кнопку радио.";
             
-            try {
-                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?system=${encodeURIComponent(system)}&seed=${Math.random()}`);
-                const text = await response.text();
-                
-                addMsg("ИИ-Тян", text, "text-cyan-400 font-bold");
-                speak(text);
-            } catch (e) {
-                console.error("AI Error");
-                if(!auto) addMsg("SYSTEM", "Ошибка связи. Попробуй еще раз.");
+            let retry = 0;
+            const delays = [1000, 2000, 4000];
+
+            while(retry < 4) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: userText }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Хм, я задумалась...";
+                    
+                    addMsg("Тян", reply, "text-cyan-400 font-bold");
+                    speak(reply);
+                    return;
+                } catch(e) {
+                    if(retry === 3) addMsg("SYSTEM", "Ошибка связи с мозгом...");
+                    await new Promise(r => setTimeout(r, delays[retry] || 5000));
+                    retry++;
+                }
             }
-            aiBusy = false;
         }
 
         function speak(text) {
@@ -286,44 +221,44 @@
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'ru-RU';
             utter.pitch = 1.3;
-            utter.rate = 1.1;
-            
-            utter.onstart = () => { isSpeaking = true; vtuberBox.classList.add('active-speech'); };
-            utter.onend = () => { isSpeaking = false; vtuberBox.classList.remove('active-speech'); };
-            
+            utter.rate = 1.05;
+            utter.onstart = () => { isSpeaking = true; rig.classList.add('speaking'); };
+            utter.onend = () => { isSpeaking = false; rig.classList.remove('speaking'); };
             window.speechSynthesis.speak(utter);
         }
 
-        function handleSend() {
-            const val = msgInput.value.trim();
+        function handleMsg() {
+            const val = input.value.trim();
             if(!val) return;
-            msgInput.value = "";
+            input.value = "";
             addMsg("Ты", val, "text-pink-500");
-            fetchAI(val);
+            callGemini(val);
         }
 
         function aiAutopilot() {
             if(!isSpeaking) {
-                fetchAI("Придумай короткую фразу для зрителей или прокомментируй музыку", true);
+                callGemini("Скажи зрителям что-нибудь милое или прокомментируй, что ты их видишь.");
             }
         }
 
         function updateTimer() {
+            let s = 0;
+            const start = Date.now();
             setInterval(() => {
-                const diff = Math.floor((Date.now() - startTime) / 1000);
-                const h = Math.floor(diff / 3600).toString().padStart(2, '0');
-                const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
-                const s = (diff % 60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                const now = Math.floor((Date.now() - start) / 1000);
+                const h = Math.floor(now/3600).toString().padStart(2, '0');
+                const m = Math.floor((now%3600)/60).toString().padStart(2, '0');
+                const sc = (now%60).toString().padStart(2, '0');
+                document.getElementById('clock').innerText = `${h}:${m}:${sc}`;
                 
-                if(diff % 4 === 0) {
-                    const v = 2500 + Math.floor(Math.random() * 200);
-                    document.getElementById('viewers').innerText = v.toLocaleString();
+                if(now % 6 === 0) {
+                    const v = 3800 + Math.floor(Math.random() * 200);
+                    document.getElementById('v-count').innerText = v.toLocaleString();
                 }
             }, 1000);
         }
 
-        msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleMsg(); });
     </script>
 </body>
 </html>
